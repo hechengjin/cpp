@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ObserverPattern", "ObserverPattern\ObserverPattern.vcxproj", "{2F3C5F36-3C43-45DC-AA69-060D2CF20E98}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingletonPattern", "SingletonPattern\SingletonPattern.vcxproj", "{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -15,6 +17,10 @@ Global
 		{2F3C5F36-3C43-45DC-AA69-060D2CF20E98}.Debug|Win32.Build.0 = Debug|Win32
 		{2F3C5F36-3C43-45DC-AA69-060D2CF20E98}.Release|Win32.ActiveCfg = Release|Win32
 		{2F3C5F36-3C43-45DC-AA69-060D2CF20E98}.Release|Win32.Build.0 = Release|Win32
+		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Debug|Win32.Build.0 = Debug|Win32
+		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Release|Win32.ActiveCfg = Release|Win32
+		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
