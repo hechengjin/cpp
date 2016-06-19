@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ObserverPattern", "Observer
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingletonPattern", "SingletonPattern\SingletonPattern.vcxproj", "{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MediatorPattern", "MediatorPattern\MediatorPattern.vcxproj", "{FEFE4985-F947-4041-8FF1-635EC6544D86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Debug|Win32.Build.0 = Debug|Win32
 		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Release|Win32.ActiveCfg = Release|Win32
 		{BB080DD4-A7D6-47C1-9297-4E1E138BFA94}.Release|Win32.Build.0 = Release|Win32
+		{FEFE4985-F947-4041-8FF1-635EC6544D86}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FEFE4985-F947-4041-8FF1-635EC6544D86}.Debug|Win32.Build.0 = Debug|Win32
+		{FEFE4985-F947-4041-8FF1-635EC6544D86}.Release|Win32.ActiveCfg = Release|Win32
+		{FEFE4985-F947-4041-8FF1-635EC6544D86}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
