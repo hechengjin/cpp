@@ -5,6 +5,7 @@
 #include "ui_qtbase.h"
 
 typedef unsigned long long uint64_t;
+typedef unsigned int uint32_t;
 #define DATETIME_FORMAT "yyyy-MM-dd hh:mm:ss.zzz"
 
 class QtBase : public QMainWindow
@@ -21,6 +22,7 @@ private slots:
     void on_getCurTimePushButton_clicked();
     void on_toReadTimePushButton_clicked();
     void on_toNumberTimePushButton_clicked();
+    void on_bitPushButton_clicked();
 private:
     Ui::QtBaseClass ui;
 };

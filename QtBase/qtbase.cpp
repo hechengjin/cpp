@@ -3,6 +3,8 @@
 #include <iostream>
 #include <QDebug>
 #include <QDateTime>
+#include <iomanip>
+#include <bitset>
 using namespace std;
 
 QtBase::QtBase(QWidget *parent)
@@ -42,15 +44,16 @@ struct QuerySummaryInfo
 {
     uint64_t mailId;
     uint64_t data;
+    uint32_t messageSize; //大小
     bool operator == (const QuerySummaryInfo &right) const
     {
-        return (mailId == right.mailId && data == right.data);
+        return (mailId == right.mailId/* && data == right.data*/);
     }
 };
 
 uint qHash(const QuerySummaryInfo key)
 {
-    return /*key.mailId + */key.data; //按日期排序
+    return key.mailId/* + key.data */; //按日期排序
 }
 
 bool compQuerySummaryAsc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
@@ -89,6 +92,70 @@ void QtBase::on_toReadTimePushButton_clicked()
     testDateTime.setTime_t(uintDateTime);
     QString strDateTime = testDateTime.toString(DATETIME_FORMAT);
     ui.readTimeLineEdit->setText(strDateTime);
+}
+
+// shift-expression << additive-expression  要移位的数  << 左移几位
+enum MessageFlag {
+    MessageFlagNone = 0,
+    MessageFlagSeen = 1 << 0,
+    MessageFlagAnswered = 1 << 1,
+    MessageFlagFlagged = 1 << 2,
+    MessageFlagDeleted = 1 << 3,
+    MessageFlagDraft = 1 << 4,
+    MessageFlagMDNSent = 1 << 5,
+    MessageFlagForwarded = 1 << 6,
+    MessageFlagSubmitPending = 1 << 7,
+    MessageFlagSubmitted = 1 << 8,
+    MessageFlagMaskAll = MessageFlagSeen | MessageFlagAnswered | MessageFlagFlagged |
+    MessageFlagDeleted | MessageFlagDraft | MessageFlagMDNSent | MessageFlagForwarded |
+    MessageFlagSubmitPending | MessageFlagSubmitted,
+};
+void printfEx(uint64_t data, int width = 20)
+{
+    //cout << hex << MessageFlagNone << dec << MessageFlagNone << endl; //输出十进制数
+    //cout<<oct<<MessageFlagSeen<<endl; //输出八进制数
+    //cout << setbase(16) << i << endl; //十六进制数
+    //cout << setbase(8) << i << endl; 八进制数
+    //int width = 20;
+    //int x = 12, y = 300, z = 1024;
+    //cout << setiosflags(ios::showbase | ios::uppercase); //设置基指示符和数值中的字母大写输出
+    //cout << dec << x << ' ' << y << ' ' << z << endl; //按十进制输出    30 300 1024
+    //cout << hex << x << ' ' << y << ' ' << z << endl; //按十六进制输出  0X1E 0X12C 0X400
+    //cout << oct << x << ' ' << y << ' ' << z << endl; //按八进制输出    036 0454 02000
+    //cout << "------------------" << endl;
+    //cout << setiosflags(ios::right);
+    //cout << setw(width) << dec << x << ' ' << setw(width) << hex << x << ' ' << setw(width) << oct << x << endl;
+    //cout << setw(width) << dec << y << ' ' << setw(width) << hex << y << ' ' << setw(width) << oct << y << endl;
+    //cout << setw(width) << dec << z << ' ' << setw(width) << hex << z << ' ' << setw(width) << oct << z << endl;
+    //cout << "------------------" << endl;
+    //cout << setprecision(2); //设置显示小数位置 作用永久
+    //cout << setiosflags(ios::fixed); //和上面一起使用，才有效果
+    //cout << 2.345 << endl;
+    //cout << resetiosflags(ios::showbase | ios::uppercase); //取消基指示符和数值中的字母大写输出
+    //char bitString[64];
+    //itoa(data, bitString, 2);
+    cout << setiosflags(ios::showbase | ios::uppercase); //设置基指示符和数值中的字母大写输出
+    cout << setiosflags(ios::right);
+    cout << setw(width) << dec << data << ' ' << setw(width) << hex << data << endl;
+    cout << bitset<64>{data} << endl; // (data)是对int的转换
+    //cout << resetiosflags(ios::showbase | ios::uppercase); //取消基指示符和数值中的字母大写输出
+}
+
+void QtBase::on_bitPushButton_clicked()
+{
+    int width = 32;
+    printfEx(MessageFlagNone);
+    printfEx(MessageFlagSeen);
+    printfEx(MessageFlagAnswered);
+    printfEx(MessageFlagFlagged);
+    printfEx(MessageFlagDeleted);
+    printfEx(MessageFlagDraft);
+    printfEx(MessageFlagMDNSent);
+    printfEx(MessageFlagForwarded);
+    printfEx(MessageFlagSubmitPending);
+    printfEx(MessageFlagSubmitted);
+    printfEx(MessageFlagMaskAll);
+    
 }
 
 void QtBase::on_toNumberTimePushButton_clicked()
@@ -201,4 +268,28 @@ void QtBase::on_containerPushButton_clicked()
     //{
     //    qDebug() << (*iter).mailId << " " << (*iter).data;
     //}
+
+    //两个set的交集计算
+    qDebug() <<  "two set's intersection :";
+    QSet<QuerySummaryInfo> setQuerySummarys1;
+    stQuerySummaryInfo.mailId = 1; //7
+    stQuerySummaryInfo.data = 1;
+    stQuerySummaryInfo.messageSize = 1;
+    setQuerySummarys1.insert(stQuerySummaryInfo);
+
+    QSet<QuerySummaryInfo> setQuerySummarys2;
+    stQuerySummaryInfo.mailId = 1; //7
+    stQuerySummaryInfo.data = 2;
+    stQuerySummaryInfo.messageSize = 2;
+    setQuerySummarys2.insert(stQuerySummaryInfo);
+    // 根据 qHash 和 == 两个共同决定是不是要移除的
+    QSet<QuerySummaryInfo> setQuerySummarys3 = setQuerySummarys1.intersect(setQuerySummarys2);
+
+    //
+    QSet<QuerySummaryInfo>::const_iterator iter2 = setQuerySummarys3.constBegin();
+    while (iter2 != setQuerySummarys3.constEnd())
+    {
+        qDebug() << (*iter2).mailId << " " << (*iter2).data << " " << (*iter2).messageSize;
+        ++iter2;
+    }
 }

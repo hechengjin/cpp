@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>400</height>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -118,6 +118,42 @@
      <string>时间相关</string>
     </property>
    </widget>
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>230</y>
+      <width>131</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="viewMode">
+     <enum>QListView::IconMode</enum>
+    </property>
+    <item>
+     <property name="text">
+      <string>1111</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2222</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="bitPushButton">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>10</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>位操作</string>
+    </property>
+   </widget>
    <zorder>groupBox</zorder>
    <zorder>charSetTestPushButton</zorder>
    <zorder>containerPushButton</zorder>
@@ -126,6 +162,8 @@
    <zorder>readTimeLineEdit</zorder>
    <zorder>toReadTimePushButton</zorder>
    <zorder>toNumberTimePushButton</zorder>
+   <zorder>listWidget</zorder>
+   <zorder>bitPushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
