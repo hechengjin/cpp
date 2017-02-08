@@ -6,171 +6,200 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>485</height>
+    <width>838</width>
+    <height>655</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>QtBase</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="charSetTestPushButton">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>10</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>字符集测试</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="containerPushButton">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>10</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>容器测试</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="getCurTimePushButton">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>110</y>
-      <width>91</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>获取当前时间</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="numberTimeLineEdit">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>90</y>
-      <width>181</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="placeholderText">
-     <string>数字显示时间</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="readTimeLineEdit">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>120</y>
-      <width>181</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="placeholderText">
-     <string>可读时间显示</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="toReadTimePushButton">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>90</y>
-      <width>91</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>转为可读时间</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="toNumberTimePushButton">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>120</y>
-      <width>91</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>转为数字时间</string>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>70</y>
-      <width>481</width>
-      <height>141</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>时间相关</string>
-    </property>
-   </widget>
-   <widget class="QListWidget" name="listWidget">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>230</y>
-      <width>131</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="viewMode">
-     <enum>QListView::IconMode</enum>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <property name="text">
-      <string>1111</string>
-     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>base</string>
+         </attribute>
+         <widget class="QWidget" name="verticalLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>801</width>
+            <height>511</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="3">
+              <widget class="QPushButton" name="bitPushButton">
+               <property name="text">
+                <string>位操作</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="charSetTestPushButton">
+               <property name="text">
+                <string>字符集测试</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="containerPushButton">
+               <property name="text">
+                <string>容器测试</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout" rowstretch="0,0">
+             <item row="1" column="3">
+              <widget class="QPushButton" name="toNumberTimePushButton">
+               <property name="text">
+                <string>转为数字时间</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QPushButton" name="toReadTimePushButton">
+               <property name="text">
+                <string>转为可读时间</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="numberTimeLineEdit">
+               <property name="placeholderText">
+                <string>数字显示时间</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="getCurTimePushButton">
+               <property name="text">
+                <string>获取当前时间</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="readTimeLineEdit">
+               <property name="placeholderText">
+                <string>可读时间显示</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>tree</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_3">
+         <attribute name="title">
+          <string>list</string>
+         </attribute>
+         <widget class="QListWidget" name="listWidget">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>30</y>
+            <width>131</width>
+            <height>61</height>
+           </rect>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>1111</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2222</string>
+           </property>
+          </item>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>status</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
-    <item>
-     <property name="text">
-      <string>2222</string>
-     </property>
-    </item>
-   </widget>
-   <widget class="QPushButton" name="bitPushButton">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>10</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>位操作</string>
-    </property>
-   </widget>
-   <zorder>groupBox</zorder>
-   <zorder>charSetTestPushButton</zorder>
-   <zorder>containerPushButton</zorder>
-   <zorder>getCurTimePushButton</zorder>
-   <zorder>numberTimeLineEdit</zorder>
-   <zorder>readTimeLineEdit</zorder>
-   <zorder>toReadTimePushButton</zorder>
-   <zorder>toNumberTimePushButton</zorder>
-   <zorder>listWidget</zorder>
-   <zorder>bitPushButton</zorder>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>838</width>
      <height>23</height>
     </rect>
    </property>

@@ -18,11 +18,11 @@ QtBase::~QtBase()
 
 }
 
-
+#pragma region 字符集测试
 
 void QtBase::on_charSetTestPushButton_clicked()
 {
-//http://www.firemail.wang/forum.php?mod=viewthread&tid=8312
+    //http://www.firemail.wang/forum.php?mod=viewthread&tid=8312
     QString str("汉字"); //QString内部使用Unicode对传入的串进行编码。
     std::cout << "Straight Output:" << str.data() << endl;
     QByteArray bytes = str.toLocal8Bit();
@@ -39,32 +39,13 @@ void QtBase::on_charSetTestPushButton_clicked()
 }
 
 
+#pragma endregion 字符集测试
 
-struct QuerySummaryInfo
-{
-    uint64_t mailId;
-    uint64_t data;
-    uint32_t messageSize; //大小
-    bool operator == (const QuerySummaryInfo &right) const
-    {
-        return (mailId == right.mailId/* && data == right.data*/);
-    }
-};
 
-uint qHash(const QuerySummaryInfo key)
-{
-    return key.mailId/* + key.data */; //按日期排序
-}
 
-bool compQuerySummaryAsc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
-{
-    return qs1.data < qs2.data;
-}
 
-bool compQuerySummaryDesc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
-{
-    return qs1.data > qs2.data;
-}
+#pragma region 时间测试
+
 
 void QtBase::on_getCurTimePushButton_clicked()
 {
@@ -94,6 +75,23 @@ void QtBase::on_toReadTimePushButton_clicked()
     ui.readTimeLineEdit->setText(strDateTime);
 }
 
+
+void QtBase::on_toNumberTimePushButton_clicked()
+{
+    QString strBuffer;
+    QDateTime current_date_time;
+    strBuffer = ui.readTimeLineEdit->text();
+    current_date_time = QDateTime::fromString(strBuffer, DATETIME_FORMAT);
+    uint64_t uintDateTime = current_date_time.toTime_t();
+    ui.numberTimeLineEdit->setText(QString::number(uintDateTime));
+}
+
+
+#pragma endregion 时间测试
+
+#pragma region 操作测试
+
+
 // shift-expression << additive-expression  要移位的数  << 左移几位
 enum MessageFlag {
     MessageFlagNone = 0,
@@ -110,7 +108,8 @@ enum MessageFlag {
     MessageFlagDeleted | MessageFlagDraft | MessageFlagMDNSent | MessageFlagForwarded |
     MessageFlagSubmitPending | MessageFlagSubmitted,
 };
-void printfEx(uint64_t data, int width = 20)
+
+void printfEx(uint64_t data, int width = 32)
 {
     //cout << hex << MessageFlagNone << dec << MessageFlagNone << endl; //输出十进制数
     //cout<<oct<<MessageFlagSeen<<endl; //输出八进制数
@@ -136,14 +135,14 @@ void printfEx(uint64_t data, int width = 20)
     //itoa(data, bitString, 2);
     cout << setiosflags(ios::showbase | ios::uppercase); //设置基指示符和数值中的字母大写输出
     cout << setiosflags(ios::right);
-    cout << setw(width) << dec << data << ' ' << setw(width) << hex << data << endl;
-    cout << bitset<64>{data} << endl; // (data)是对int的转换
+    cout << setw(width) << dec << data << 'd' << setw(width) << hex << data << endl;
+    cout << ' ' << bitset<64>{data} << endl; // (data)是对int的转换
     //cout << resetiosflags(ios::showbase | ios::uppercase); //取消基指示符和数值中的字母大写输出
 }
 
 void QtBase::on_bitPushButton_clicked()
 {
-    int width = 32;
+    //int width = 32;
     printfEx(MessageFlagNone);
     printfEx(MessageFlagSeen);
     printfEx(MessageFlagAnswered);
@@ -155,17 +154,37 @@ void QtBase::on_bitPushButton_clicked()
     printfEx(MessageFlagSubmitPending);
     printfEx(MessageFlagSubmitted);
     printfEx(MessageFlagMaskAll);
-    
+
 }
 
-void QtBase::on_toNumberTimePushButton_clicked()
+#pragma endregion 操作测试
+
+#pragma region 容器测试
+
+struct QuerySummaryInfo
 {
-    QString strBuffer;
-    QDateTime current_date_time;
-    strBuffer = ui.readTimeLineEdit->text();
-    current_date_time = QDateTime::fromString(strBuffer, DATETIME_FORMAT);
-    uint64_t uintDateTime = current_date_time.toTime_t();
-    ui.numberTimeLineEdit->setText(QString::number(uintDateTime));
+    uint64_t mailId;
+    uint64_t data;
+    uint32_t messageSize; //大小
+    bool operator == (const QuerySummaryInfo &right) const
+    {
+        return (mailId == right.mailId/* && data == right.data*/);
+    }
+};
+
+uint qHash(const QuerySummaryInfo key)
+{
+    return key.mailId/* + key.data */; //按日期排序
+}
+
+bool compQuerySummaryAsc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
+{
+    return qs1.data < qs2.data;
+}
+
+bool compQuerySummaryDesc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
+{
+    return qs1.data > qs2.data;
 }
 
 void QtBase::on_containerPushButton_clicked()
@@ -175,7 +194,7 @@ void QtBase::on_containerPushButton_clicked()
     //1. bool operator == (const Type &b) const
     //2. 一个全局的uint qHash(Type key)函数
     //QSet有序测试
-   
+
 
     QSet<QuerySummaryInfo> setQuerySummarys;
     QuerySummaryInfo stQuerySummaryInfo;
@@ -221,8 +240,8 @@ void QtBase::on_containerPushButton_clicked()
     {
         qDebug() << listQuerySummarys.at(i).mailId << " " << listQuerySummarys.at(i).data;
     }
-    
-    
+
+
     QuerySummaryInfo stQuerySummaryInfoFind;
     stQuerySummaryInfoFind.mailId = 4;
     stQuerySummaryInfoFind.data = 100;
@@ -270,7 +289,7 @@ void QtBase::on_containerPushButton_clicked()
     //}
 
     //两个set的交集计算
-    qDebug() <<  "two set's intersection :";
+    qDebug() << "two set's intersection :";
     QSet<QuerySummaryInfo> setQuerySummarys1;
     stQuerySummaryInfo.mailId = 1; //7
     stQuerySummaryInfo.data = 1;
@@ -293,3 +312,7 @@ void QtBase::on_containerPushButton_clicked()
         ++iter2;
     }
 }
+
+#pragma endregion 容器测试
+
+
