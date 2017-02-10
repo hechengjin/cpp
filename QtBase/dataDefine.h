@@ -16,6 +16,8 @@
 #define __DATADEFINE_H__
 #include <QString>
 #include <QList>
+#include <QVector>
+#include <QMap>
 #include "dataType.h"
 
 #define DEFAULT_VALUE_ZERO    0
@@ -132,6 +134,25 @@ struct MailConversationInfo : MailHeaderInfo
 };
 
 #pragma endregion 内存与数据库表对应结构定义
+
+#pragma region 内存数据
+
+struct MemoryMailData
+{
+    MemoryMailData()
+    {
+    }
+
+    //uint32_t latestTime; //动态算出来
+    //uint32_t oldestTime;  //不用
+    QString listPathName;
+    uint32_t numberOfMessagesOnServer;
+
+    QVector<MailHeaderInfo> vecMailHeaderDatas;
+};
+
+#pragma endregion 内存数据
+
 
 #pragma region 邮件列表相关定义
 enum MailListModelColumn {

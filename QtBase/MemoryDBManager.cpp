@@ -31,7 +31,7 @@ void CMemoryDBManager::init()
     //前天
     QDate beforeyesterday = yesterday;
     beforeyesterday = beforeyesterday.addDays(-1);
-
+    MemoryMailData stMemoryMailData;
     for (int i = 0; i < 10; i++) //初始化邮件数据
     {
         MailHeaderInfo stMailHeaderInfo;
@@ -74,13 +74,14 @@ void CMemoryDBManager::init()
         //stMailHeaderInfo.referenceInfo = stFetchMessagesParam.references.join(",");
         stMailHeaderInfo.flags = DEFAULT_VALUE_ZERO;
         //stMailHeaderInfo.keyLocal = getKeyLocal(stMailHeaderInfo);
-        m_listMemMailHeaders.push_back(stMailHeaderInfo);
+        stMemoryMailData.vecMailHeaderDatas.push_back(stMailHeaderInfo);
     }
+    m_mapMailMemoryData[inboxFolderId] = stMemoryMailData;
 #pragma endregion 初始化邮件
 
 #pragma region 初始化会话数据
     MailConversationInfo stMailConversationInfo;
-    stMailConversationInfo = m_listMemMailHeaders.at(0);
+    stMailConversationInfo = m_mapMailMemoryData[inboxFolderId].vecMailHeaderDatas.at(0);
     stMailConversationInfo.Id = 1;
     stMailConversationInfo.Subject = "Conversation Subject: 1";
     int hour = qrand() % 22 + 1;
@@ -113,12 +114,18 @@ void CMemoryDBManager::init()
 MailHeaderInfo CMemoryDBManager::getMailHeader(uint64_t mailId)
 {
     QMutexLocker locker(&m_mailMutex);
-    for (int i = 0; i < m_listMemMailHeaders.size(); i++)
+    QMapIterator<uint32_t, MemoryMailData> iter(m_mapMailMemoryData);
+    int index = 0;
+    while (iter.hasNext())
     {
-        if (m_listMemMailHeaders.at(i).Id == mailId)
-        {
-            return m_listMemMailHeaders.at(i);
+        iter.next();
+        for (int i = 0; i < iter.value().vecMailHeaderDatas.size(); ++i) {
+            if (iter.value().vecMailHeaderDatas.at(i).Id == mailId)
+            {
+                return iter.value().vecMailHeaderDatas.at(i);
+            }
         }
+        index++;
     }
     MailHeaderInfo stMailHeaderInfo;
     return stMailHeaderInfo;
