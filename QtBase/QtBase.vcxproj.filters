@@ -55,6 +55,9 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{78a74264-d429-468e-8c3d-a00603cdc698}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,9 +75,30 @@
     <ClCompile Include="GeneratedFiles\qrc_qtbase.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="TreeMailItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dataDefine.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_treemailmodel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_treemailmodel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="treemailmodel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryDBManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtbase.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="treemailmodel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -91,6 +115,18 @@
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtbase.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeMailItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dataType.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="dataDefine.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryDBManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

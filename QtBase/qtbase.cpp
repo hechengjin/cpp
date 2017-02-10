@@ -5,17 +5,34 @@
 #include <QDateTime>
 #include <iomanip>
 #include <bitset>
+#include "MemoryDBManager.h"
+#include "treemailmodel.h"
 using namespace std;
 
 QtBase::QtBase(QWidget *parent)
     : QMainWindow(parent)
+    , m_mailListDisplayMode(MLDM_CONVERSATION)
 {
     ui.setupUi(this);
+    init();
 }
 
 QtBase::~QtBase()
 {
 
+}
+
+void QtBase::init()
+{
+    CMemoryDBManager::instance()->init();
+    TreeMailModel::instance()->initRootItem();
+    TreeMailModel::instance()->loadData(m_mailListDisplayMode);
+
+    ui.mailListTreeView->setModel(TreeMailModel::instance());
+    for (int column = 0; column < TreeMailModel::instance()->columnCount(); ++column)
+        ui.mailListTreeView->resizeColumnToContents(column);
+
+    //ui.mailListTreeView->expandAll();
 }
 
 #pragma region 字符集测试
@@ -316,3 +333,8 @@ void QtBase::on_containerPushButton_clicked()
 #pragma endregion 容器测试
 
 
+#pragma region 邮件列表
+
+
+
+#pragma endregion 邮件列表

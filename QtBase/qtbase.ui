@@ -152,6 +152,16 @@
          <attribute name="title">
           <string>tree</string>
          </attribute>
+         <widget class="QTreeView" name="mailListTreeView">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>30</y>
+            <width>771</width>
+            <height>471</height>
+           </rect>
+          </property>
+         </widget>
         </widget>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">

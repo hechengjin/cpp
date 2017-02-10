@@ -3,9 +3,10 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_qtbase.h"
+#include "dataDefine.h"
+#include <QList>
 
-typedef unsigned long long uint64_t;
-typedef unsigned int uint32_t;
+
 #define DATETIME_FORMAT "yyyy-MM-dd hh:mm:ss.zzz"
 
 class QtBase : public QMainWindow
@@ -15,6 +16,11 @@ class QtBase : public QMainWindow
 public:
     QtBase(QWidget *parent = 0);
     ~QtBase();
+
+protected:
+    void init();
+private:
+    int m_mailListDisplayMode;
 
 private slots:
     void on_charSetTestPushButton_clicked();
