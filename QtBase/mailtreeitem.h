@@ -23,7 +23,7 @@ public:
     MailTreeItem *child(int number);
     int childCount() const;
     //int columnCount() const;
-    QVariant data(int column) const;
+    QVariant data(int column, int role) const;
     //bool insertChildren(int position, int count, int columns);
     MailTreeItem *insertChildren(int position, const MailListItemData & stMailListItemData);
     MailTreeItem *childExist(const MailListItemData & stMailListItemData);

@@ -90,7 +90,8 @@ void QMailTreeModel::loadData(int mailListDisplayMode)
             stMailListItemData.itemType = MLIT_GROUP;
             stMailListItemData.id = groupId++;
             stMailListItemData.messageDate = stMailConversationInfo.date;
-            stMailListItemData.name = generationGroupName(stMailListItemData.messageDate);            
+            stMailListItemData.name = generationGroupName(stMailListItemData.messageDate);        
+            stMailListItemData.messageSize = stMailConversationInfo.messageSize;
             m_rootItem->insertChildren(m_rootItem->childCount(), stMailListItemData);
         }
 
@@ -103,6 +104,7 @@ void QMailTreeModel::loadData(int mailListDisplayMode)
             stMailListItemData.messageDate = stMailConversationInfo.date;
             stMailListItemData.name = stMailConversationInfo.Subject;
             stMailListItemData.id = stMailConversationInfo.Id;
+            stMailListItemData.messageSize = stMailConversationInfo.messageSize;
             MailTreeItem *parent = getParentItem(groupName);
             if (parent)
             {
@@ -116,6 +118,7 @@ void QMailTreeModel::loadData(int mailListDisplayMode)
                         stMailListItemData.messageDate = stMailHeaderInfo.date;
                         stMailListItemData.name = stMailHeaderInfo.Subject;
                         stMailListItemData.id = stMailHeaderInfo.Id;
+                        stMailListItemData.messageSize = stMailHeaderInfo.messageSize;
                         converItem->insertChildren(converItem->childCount(), stMailListItemData);
                     }
                     
@@ -150,12 +153,12 @@ QVariant QMailTreeModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole && role != Qt::EditRole)
+    if (role != Qt::DisplayRole && role !=UIROLE_ReadableSize)
         return QVariant();
 
     MailTreeItem *item = getItem(index);
 
-    return item->data(index.column());
+    return item->data(index.column(), role);
 }
 
 //! [3]
@@ -165,7 +168,7 @@ Qt::ItemFlags QMailTreeModel::flags(const QModelIndex &index) const
         return 0;
 
     //return Qt::ItemIsEditable | QAbstractItemModel::flags(index); //�ɱ༭
-    return QAbstractItemModel::flags(index); //�ɱ༭
+    return QAbstractItemModel::flags(index);
 }
 //! [3]
 
@@ -220,8 +223,11 @@ QVariant QMailTreeModel::headerData(int section, Qt::Orientation orientation,
             case MLMC_Date:
                 rv = tr("Date");
                 break;
-            case MLMC_Size:
+            case MLMC_MessageSize:
                 rv = tr("Size");
+                break;
+            case MLMC_Size:
+                rv = tr("number Size");
                 break;
             case MLMC_Folder:
                 rv = tr("Folder");

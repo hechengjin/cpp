@@ -20,8 +20,27 @@
 #include <QMap>
 #include "dataType.h"
 
+#pragma region 常量定义
+
 #define DEFAULT_VALUE_ZERO    0
 #define NOT_SET_VALUE    4294967295 //-1 99999999  4294967295
+
+
+// 定义GB、MB、KB的计算常量
+const int GB = 1024 * 1024 * 1024;
+const int MB = 1024 * 1024;
+const int KB = 1024;
+
+#pragma endregion 常量定义
+
+
+#pragma region 函数定义
+
+QString bytesToGBMBKB(qint64 size);
+
+#pragma endregion 函数定义
+
+
 
 #pragma region 内存与数据库表对应结构定义
 /**
@@ -155,6 +174,16 @@ struct MemoryMailData
 
 
 #pragma region 邮件列表相关定义
+
+/**
+* 界面相关角色定义
+*/
+enum UIRole
+{
+    UIROLE_ReadableSize = Qt::UserRole,
+    UIROLE_xx
+};
+
 enum MailListModelColumn {
     //headers << tr("Id") << tr("ItemType") << tr("Priority") << tr("Attachment") << tr("From") << tr("To") << tr("Subject") << tr("Date") << tr("Size") << tr("Folder") << tr("Uid");
     MLMC_Fold, //折叠占位
@@ -166,6 +195,7 @@ enum MailListModelColumn {
     MLMC_To,
     MLMC_Subject,
     MLMC_Date,
+    MLMC_MessageSize,
     MLMC_Size,
     MLMC_Folder,
     MLMC_Uid,

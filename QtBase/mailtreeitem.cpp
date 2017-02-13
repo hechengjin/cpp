@@ -54,7 +54,7 @@ int MailTreeItem::childNumber() const
 //    return itemData.count();
 //}
 
-QVariant MailTreeItem::data(int column) const
+QVariant MailTreeItem::data(int column, int role) const
 {
     //return itemData.value(column);
     QVariant rv;
@@ -78,6 +78,20 @@ QVariant MailTreeItem::data(int column) const
         rv = maillDateTime;
         break;
     }
+    case MLMC_MessageSize:
+    {
+        if (UIROLE_ReadableSize == role)
+        {
+            rv = stItemData.messageSize;
+        }
+        else
+            rv = bytesToGBMBKB(stItemData.messageSize);
+        break;
+    }
+        
+    case MLMC_Size:
+        rv = stItemData.messageSize;
+        break;
         
 
     default:

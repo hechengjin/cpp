@@ -15,8 +15,9 @@ QtBase::QtBase(QWidget *parent)
     : QMainWindow(parent)
     , m_mailListDisplayMode(MLDM_CONVERSATION)
 {
-    ui.setupUi(this);
     init();
+    ui.setupUi(this);
+    
 }
 
 QtBase::~QtBase()
@@ -31,21 +32,21 @@ void QtBase::init()
     QMailTreeModel::instance()->loadData(m_mailListDisplayMode);
 
     //ui.mailListTreeView->setModel(TreeMailModel::instance());
-    QSortFilterProxyModel *pProxyModel = new QSortFilterProxyModel(this);
-    pProxyModel->setSourceModel(QMailTreeModel::instance());
-    ui.mailListTreeView->setModel(pProxyModel);
+    //QSortFilterProxyModel *pProxyModel = new QSortFilterProxyModel(this);
+    //pProxyModel->setSourceModel(QMailTreeModel::instance());
+    //ui.mailListTreeView->setModel(pProxyModel);
     // 设置可排序
-    ui.mailListTreeView->setSortingEnabled(true);
+    //ui.mailListTreeView->setSortingEnabled(true);
     // 设置按照日期降序排列
-    ui.mailListTreeView->sortByColumn(MLMC_Date, Qt::DescendingOrder);
+    //ui.mailListTreeView->sortByColumn(MLMC_Date, Qt::DescendingOrder);
 
-    ui.mailListTreeView->setHeader(new QMailTreeViewHeader());
-    for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
-        ui.mailListTreeView->resizeColumnToContents(column);
+    //ui.mailListTreeView->setHeader(new QMailTreeViewHeader());
+    //for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
+    //    ui.mailListTreeView->resizeColumnToContents(column);
 
-    ui.mailListTreeView->setColumnHidden(MLMC_Priority, true);
+    //ui.mailListTreeView->setColumnHidden(MLMC_Priority, true);
 
-    ui.mailListTreeView->expandAll();
+    //ui.mailListTreeView->expandAll();
 }
 
 #pragma region 字符集测试

@@ -10,7 +10,8 @@ class QMailTreeView : public QTreeView
 public:
     QMailTreeView(QWidget *parent);
     ~QMailTreeView();
-
+protected:
+    void init();
 private:
     
 };
