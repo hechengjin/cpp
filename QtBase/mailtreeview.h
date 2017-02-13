@@ -12,6 +12,12 @@ public:
     ~QMailTreeView();
 protected:
     void init();
+    void signalSlotConnection();
+
+
+protected slots:
+    void slotCustomContextMenu(const QPoint &pos);
+    void slotDeleteMailClicked();
 private:
     
 };

@@ -24,7 +24,7 @@ bool QMailSortFilterProxyModel::lessThan(const QModelIndex &source_left, const Q
     if (!source_left.isValid() || !source_right.isValid())
         return false;
 
-    if ((source_left.column() == MLMC_MessageSize) && (source_right.column() == MLMC_MessageSize))
+    if ((source_left.column() == MLMC_Size) && (source_right.column() == MLMC_Size))
     {
         // 这里我们所取得数据是用户源数据
         QVariant leftData = sourceModel()->data(source_left, UIROLE_ReadableSize);

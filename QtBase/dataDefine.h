@@ -195,7 +195,6 @@ enum MailListModelColumn {
     MLMC_To,
     MLMC_Subject,
     MLMC_Date,
-    MLMC_MessageSize,
     MLMC_Size,
     MLMC_Folder,
     MLMC_Uid,

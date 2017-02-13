@@ -120,6 +120,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_mailsortfilterproxymodel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="mailitemdelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mailitemdelegate.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mailitemdelegate.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtbase.h">
@@ -135,6 +144,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="mailsortfilterproxymodel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mailitemdelegate.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -7,7 +7,7 @@ class QMailTreeViewHeader : public QHeaderView
     Q_OBJECT
 
 public:
-    QMailTreeViewHeader(QWidget *parent = NULL);
+    QMailTreeViewHeader(QWidget *parent);
     ~QMailTreeViewHeader();
 protected:
     void mousePressEvent(QMouseEvent *event);

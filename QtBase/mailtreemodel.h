@@ -56,8 +56,8 @@ public:
     //                   const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
     //bool insertRows(int position, int rows,
     //                const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
-    //bool removeRows(int position, int rows,
-    //                const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+    bool removeRows(int position, int rows,
+        const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
 
 private:
     //void setupModelData(const QStringList &lines, TreeMailItem *parent);

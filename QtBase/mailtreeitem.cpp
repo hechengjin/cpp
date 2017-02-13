@@ -14,6 +14,7 @@
 #include "mailtreeitem.h"
 #include <QDateTime>
 #include <QStringList>
+#include <QColor>
 
 //TreeMailItem::TreeMailItem(const QVector<QVariant> &data, TreeMailItem *parent)
 //{
@@ -58,45 +59,50 @@ QVariant MailTreeItem::data(int column, int role) const
 {
     //return itemData.value(column);
     QVariant rv;
-    switch (column) {
-    case MLMC_Id:
-        rv = stItemData.id;
-        break;
-
-    case MLMC_ItemType:
-        rv = stItemData.itemType;
-        break;
-
-    case MLMC_Subject:
-        rv = stItemData.name;
-        break;
-
-    case MLMC_Date:
+    switch (role)
     {
-        QDateTime maillDateTime;
-        maillDateTime.setTime_t(stItemData.messageDate);
-        rv = maillDateTime;
-        break;
-    }
-    case MLMC_MessageSize:
-    {
-        if (UIROLE_ReadableSize == role)
+        case Qt::TextColorRole:
+            return QColor(Qt::black);
+        case Qt::TextAlignmentRole:
+            return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+        case Qt::DisplayRole:
         {
-            rv = stItemData.messageSize;
-        }
-        else
-            rv = bytesToGBMBKB(stItemData.messageSize);
-        break;
-    }
-        
-    case MLMC_Size:
-        rv = stItemData.messageSize;
-        break;
-        
+            switch (column) {
+                case MLMC_Id:
+                    rv = stItemData.id;
+                    break;
 
-    default:
-        break;
+                case MLMC_ItemType:
+                    rv = stItemData.itemType;
+                    break;
+
+                case MLMC_Subject:
+                    rv = stItemData.name;
+                    break;
+
+                case MLMC_Date:
+                {
+                    QDateTime maillDateTime;
+                    maillDateTime.setTime_t(stItemData.messageDate);
+                    rv = maillDateTime;
+                    break;
+                }
+                case MLMC_Size:
+                    rv = stItemData.messageSize;
+                    break;
+                default:
+                    break;
+            }
+        }
+        case UIROLE_ReadableSize:
+        {
+            if (MLMC_Size == column)
+            {
+                rv = stItemData.messageSize;
+            }
+        }
     }
+
     return rv;
 }
 

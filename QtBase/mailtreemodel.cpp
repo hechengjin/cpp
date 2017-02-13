@@ -153,8 +153,8 @@ QVariant QMailTreeModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole && role !=UIROLE_ReadableSize)
-        return QVariant();
+    //if (role != Qt::DisplayRole && role !=UIROLE_ReadableSize)
+    //    return QVariant();
 
     MailTreeItem *item = getItem(index);
 
@@ -223,11 +223,8 @@ QVariant QMailTreeModel::headerData(int section, Qt::Orientation orientation,
             case MLMC_Date:
                 rv = tr("Date");
                 break;
-            case MLMC_MessageSize:
-                rv = tr("Size");
-                break;
             case MLMC_Size:
-                rv = tr("number Size");
+                rv = tr("    Size    ");
                 break;
             case MLMC_Folder:
                 rv = tr("Folder");
@@ -247,7 +244,6 @@ QModelIndex QMailTreeModel::index(int row, int column, const QModelIndex &parent
 {
     if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
-
 
     MailTreeItem *parentItem = getItem(parent);
 
@@ -311,17 +307,15 @@ QModelIndex QMailTreeModel::parent(const QModelIndex &index) const
 //    return success;
 //}
 
-//bool TreeMailModel::removeRows(int position, int rows, const QModelIndex &parent)
-//{
-//    TreeMailItem *parentItem = getItem(parent);
-//    bool success = true;
-//
-//    beginRemoveRows(parent, position, position + rows - 1);
-//    success = parentItem->removeChildren(position, rows);
-//    endRemoveRows();
-//
-//    return success;
-//}
+bool QMailTreeModel::removeRows(int position, int rows, const QModelIndex &parent)
+{
+    MailTreeItem *parentItem = getItem(parent);
+    bool success = true;
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
+    return success;
+}
 
 //! [8]
 int QMailTreeModel::rowCount(const QModelIndex &parent) const
