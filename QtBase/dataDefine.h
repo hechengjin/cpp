@@ -158,7 +158,6 @@ struct MemoryMailData
 enum MailListModelColumn {
     //headers << tr("Id") << tr("ItemType") << tr("Priority") << tr("Attachment") << tr("From") << tr("To") << tr("Subject") << tr("Date") << tr("Size") << tr("Folder") << tr("Uid");
     MLMC_Fold, //折叠占位
-    //MLMC_Fold2, //折叠占位2
     MLMC_Id,
     MLMC_ItemType,
     MLMC_Priority,

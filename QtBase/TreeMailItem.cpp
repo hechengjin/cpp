@@ -12,7 +12,7 @@
 */
 
 #include "TreeMailItem.h"
-
+#include <QDateTime>
 #include <QStringList>
 
 //TreeMailItem::TreeMailItem(const QVector<QVariant> &data, TreeMailItem *parent)
@@ -72,8 +72,13 @@ QVariant TreeMailItem::data(int column) const
         break;
 
     case MLMC_Date:
-        rv = stItemData.messageDate;
+    {
+        QDateTime maillDateTime;
+        maillDateTime.setTime_t(stItemData.messageDate);
+        rv = maillDateTime;
         break;
+    }
+        
 
     default:
         break;

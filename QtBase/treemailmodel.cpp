@@ -193,9 +193,6 @@ QVariant TreeMailModel::headerData(int section, Qt::Orientation orientation,
             case MLMC_Fold:
                 rv = tr("        ");
                 break;
-            //case MLMC_Fold2:
-            //    rv = tr(" ");
-            //    break;
             case MLMC_Id:
                 rv = tr("ID");
                 break;

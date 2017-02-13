@@ -107,8 +107,6 @@ void CMemoryDBManager::init()
 
 #pragma endregion 初始化会话数据
 
-
-
 }
 
 MailHeaderInfo CMemoryDBManager::getMailHeader(uint64_t mailId)

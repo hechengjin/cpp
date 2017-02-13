@@ -7,6 +7,8 @@
 #include <bitset>
 #include "MemoryDBManager.h"
 #include "treemailmodel.h"
+#include "mailListTreeViewHeader.h"
+#include <QSortFilterProxyModel>
 using namespace std;
 
 QtBase::QtBase(QWidget *parent)
@@ -28,11 +30,22 @@ void QtBase::init()
     TreeMailModel::instance()->initRootItem();
     TreeMailModel::instance()->loadData(m_mailListDisplayMode);
 
-    ui.mailListTreeView->setModel(TreeMailModel::instance());
+    //ui.mailListTreeView->setModel(TreeMailModel::instance());
+    QSortFilterProxyModel *pProxyModel = new QSortFilterProxyModel(this);
+    pProxyModel->setSourceModel(TreeMailModel::instance());
+    ui.mailListTreeView->setModel(pProxyModel);
+    // 设置可排序
+    ui.mailListTreeView->setSortingEnabled(true);
+    // 设置按照日期降序排列
+    ui.mailListTreeView->sortByColumn(MLMC_Date, Qt::DescendingOrder);
+
+    ui.mailListTreeView->setHeader(new QMailListTreeViewHeader());
     for (int column = 0; column < TreeMailModel::instance()->columnCount(); ++column)
         ui.mailListTreeView->resizeColumnToContents(column);
 
-    //ui.mailListTreeView->expandAll();
+    ui.mailListTreeView->setColumnHidden(MLMC_Priority, true);
+
+    ui.mailListTreeView->expandAll();
 }
 
 #pragma region 字符集测试
