@@ -152,7 +152,7 @@
          <attribute name="title">
           <string>tree</string>
          </attribute>
-         <widget class="QTreeView" name="mailListTreeView">
+         <widget class="QTreeMailView" name="mailListTreeView">
           <property name="geometry">
            <rect>
             <x>20</x>
@@ -225,6 +225,13 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QTreeMailView</class>
+   <extends>QTreeView</extends>
+   <header>treemailview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="qtbase.qrc"/>
  </resources>

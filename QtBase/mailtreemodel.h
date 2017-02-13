@@ -5,29 +5,29 @@
 **
 ****************************************************************************/
 
-#ifndef TREEMODEL_H
-#define TREEMODEL_H
+#ifndef QMAILTREEMODEL_H
+#define QMAILTREEMODEL_H
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
 
 class CMemoryDBManager;
-class TreeMailItem;
+class MailTreeItem;
 
 //! [0]
-class TreeMailModel : public QAbstractItemModel
+class QMailTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    TreeMailModel(QObject *parent = 0);
+    QMailTreeModel(QObject *parent = 0);
     //TreeMailModel(const QStringList &headers, const QString &data,
     //          QObject *parent = 0);
-    ~TreeMailModel();
+    ~QMailTreeModel();
 //! [0] //! [1]
 
-    static TreeMailModel* instance();
+    static QMailTreeModel* instance();
     void initRootItem();
     void loadData(int mailListDisplayMode);
 
@@ -61,11 +61,11 @@ public:
 
 private:
     //void setupModelData(const QStringList &lines, TreeMailItem *parent);
-    TreeMailItem *getItem(const QModelIndex &index) const;
-    TreeMailItem *getParentItem(const QString & groupName);
-    TreeMailItem *m_rootItem;
+    MailTreeItem *getItem(const QModelIndex &index) const;
+    MailTreeItem *getParentItem(const QString & groupName);
+    MailTreeItem *m_rootItem;
     int m_mailListDisplayMode;
 };
 //! [2]
 
-#endif // TREEMODEL_H
+#endif // QMAILTREEMODEL_H

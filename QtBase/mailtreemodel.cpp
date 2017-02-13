@@ -7,17 +7,17 @@
 
 #include <QtWidgets>
 
-#include "treemailitem.h"
-#include "treemailmodel.h"
+#include "mailtreeitem.h"
+#include "mailtreemodel.h"
 #include "MemoryDBManager.h"
 
-Q_GLOBAL_STATIC(TreeMailModel, treeMailModel)
-TreeMailModel *TreeMailModel::instance()
+Q_GLOBAL_STATIC(QMailTreeModel, treeMailModel)
+QMailTreeModel *QMailTreeModel::instance()
 {
     return treeMailModel;
 }
 
-TreeMailModel::TreeMailModel(QObject *parent)
+QMailTreeModel::QMailTreeModel(QObject *parent)
 : QAbstractItemModel(parent)
 , m_mailListDisplayMode(MLDM_CONVERSATION)
 {
@@ -34,12 +34,12 @@ TreeMailModel::TreeMailModel(QObject *parent)
 //    setupModelData(data.split(QString("\n")), rootItem);
 //}
 
-void TreeMailModel::initRootItem()
+void QMailTreeModel::initRootItem()
 {
-    m_rootItem = new TreeMailItem();
+    m_rootItem = new MailTreeItem();
 }
 
-TreeMailModel::~TreeMailModel()
+QMailTreeModel::~QMailTreeModel()
 {
     delete m_rootItem;
 }
@@ -73,7 +73,7 @@ QString generationGroupName(/*int dayOfWeek, */uint64_t mailDate)
     return groupName;
 }
 
-void TreeMailModel::loadData(int mailListDisplayMode)
+void QMailTreeModel::loadData(int mailListDisplayMode)
 {
 #pragma region 初始化模型数据
     m_mailListDisplayMode = mailListDisplayMode;
@@ -103,10 +103,10 @@ void TreeMailModel::loadData(int mailListDisplayMode)
             stMailListItemData.messageDate = stMailConversationInfo.date;
             stMailListItemData.name = stMailConversationInfo.Subject;
             stMailListItemData.id = stMailConversationInfo.Id;
-            TreeMailItem *parent = getParentItem(groupName);
+            MailTreeItem *parent = getParentItem(groupName);
             if (parent)
             {
-                TreeMailItem * converItem = parent->insertChildren(parent->childCount(), stMailListItemData);
+                MailTreeItem * converItem = parent->insertChildren(parent->childCount(), stMailListItemData);
                 if (converItem) //在会话下添加所有邮件
                 {
                     for (int i = 0; i < stMailConversationInfo.listConversationMailIds.size(); i++)
@@ -126,7 +126,7 @@ void TreeMailModel::loadData(int mailListDisplayMode)
 #pragma endregion 初始化模型数据
 }
 
-TreeMailItem * TreeMailModel::getParentItem(const QString & groupName)
+MailTreeItem * QMailTreeModel::getParentItem(const QString & groupName)
 {
     for (int i = 0; i < m_rootItem->childCount(); i++)
     {
@@ -138,14 +138,14 @@ TreeMailItem * TreeMailModel::getParentItem(const QString & groupName)
     return NULL;
 }
 //! [2]
-int TreeMailModel::columnCount(const QModelIndex & /* parent */) const
+int QMailTreeModel::columnCount(const QModelIndex & /* parent */) const
 {
     return MLMC_Count;
     //return m_rootItem->columnCount();
 }
 //! [2]
 
-QVariant TreeMailModel::data(const QModelIndex &index, int role) const
+QVariant QMailTreeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -153,13 +153,13 @@ QVariant TreeMailModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole && role != Qt::EditRole)
         return QVariant();
 
-    TreeMailItem *item = getItem(index);
+    MailTreeItem *item = getItem(index);
 
     return item->data(index.column());
 }
 
 //! [3]
-Qt::ItemFlags TreeMailModel::flags(const QModelIndex &index) const
+Qt::ItemFlags QMailTreeModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return 0;
@@ -170,10 +170,10 @@ Qt::ItemFlags TreeMailModel::flags(const QModelIndex &index) const
 //! [3]
 
 //! [4]
-TreeMailItem *TreeMailModel::getItem(const QModelIndex &index) const
+MailTreeItem *QMailTreeModel::getItem(const QModelIndex &index) const
 {
     if (index.isValid()) {
-        TreeMailItem *item = static_cast<TreeMailItem*>(index.internalPointer());
+        MailTreeItem *item = static_cast<MailTreeItem*>(index.internalPointer());
         if (item)
             return item;
     }
@@ -181,7 +181,7 @@ TreeMailItem *TreeMailModel::getItem(const QModelIndex &index) const
 }
 //! [4]
 
-QVariant TreeMailModel::headerData(int section, Qt::Orientation orientation,
+QVariant QMailTreeModel::headerData(int section, Qt::Orientation orientation,
                                int role) const
 {
     QVariant rv;
@@ -237,15 +237,15 @@ QVariant TreeMailModel::headerData(int section, Qt::Orientation orientation,
     return rv;
 }
 
-QModelIndex TreeMailModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex QMailTreeModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
 
 
-    TreeMailItem *parentItem = getItem(parent);
+    MailTreeItem *parentItem = getItem(parent);
 
-    TreeMailItem *childItem = parentItem->child(row);
+    MailTreeItem *childItem = parentItem->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
@@ -276,13 +276,13 @@ QModelIndex TreeMailModel::index(int row, int column, const QModelIndex &parent)
 //}
 
 //! [7]
-QModelIndex TreeMailModel::parent(const QModelIndex &index) const
+QModelIndex QMailTreeModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QModelIndex();
 
-    TreeMailItem *childItem = getItem(index);
-    TreeMailItem *parentItem = childItem->parent();
+    MailTreeItem *childItem = getItem(index);
+    MailTreeItem *parentItem = childItem->parent();
 
     if (parentItem == m_rootItem)
         return QModelIndex();
@@ -318,9 +318,9 @@ QModelIndex TreeMailModel::parent(const QModelIndex &index) const
 //}
 
 //! [8]
-int TreeMailModel::rowCount(const QModelIndex &parent) const
+int QMailTreeModel::rowCount(const QModelIndex &parent) const
 {
-    TreeMailItem *parentItem = getItem(parent);
+    MailTreeItem *parentItem = getItem(parent);
     if (parentItem->stItemData.itemType == MLIT_CONVERSATION)
     {
         int xx;

@@ -4,7 +4,7 @@
 
 class CMemoryDBManager
 {
-    friend class TreeMailModel;
+    friend class QMailTreeModel;
 public:
     CMemoryDBManager();
     ~CMemoryDBManager();

@@ -5,30 +5,30 @@
 **
 ****************************************************************************/
 
-#ifndef TREEMAILITEM_H
-#define TREEMAILITEM_H
+#ifndef MAILTREEITEM_H
+#define MAILTREEITEM_H
 #include "dataDefine.h"
 
 #include <QList>
 #include <QVariant>
 #include <QVector>
 
-class TreeMailItem
+class MailTreeItem
 {
 public:
     //explicit TreeMailItem(const QVector<QVariant> &data, TreeMailItem *parent = 0);
-    explicit TreeMailItem(TreeMailItem *parent = 0);
-    ~TreeMailItem();
+    explicit MailTreeItem(MailTreeItem *parent = 0);
+    ~MailTreeItem();
 
-    TreeMailItem *child(int number);
+    MailTreeItem *child(int number);
     int childCount() const;
     //int columnCount() const;
     QVariant data(int column) const;
     //bool insertChildren(int position, int count, int columns);
-    TreeMailItem *insertChildren(int position, const MailListItemData & stMailListItemData);
-    TreeMailItem *childExist(const MailListItemData & stMailListItemData);
+    MailTreeItem *insertChildren(int position, const MailListItemData & stMailListItemData);
+    MailTreeItem *childExist(const MailListItemData & stMailListItemData);
     //bool insertColumns(int position, int columns);
-    TreeMailItem *parent();
+    MailTreeItem *parent();
     bool removeChildren(int position, int count);
     //bool removeColumns(int position, int columns);
     int childNumber() const;
@@ -38,11 +38,11 @@ public:
 public:
     MailListItemData stItemData;
 private:
-    QList<TreeMailItem*> childItems; //所有子行数据
+    QList<MailTreeItem*> childItems; //所有子行数据
     //QVector<QVariant> itemData;  //当前行每列的数据  itemData[column] = value; //排序如何处理？  //重新加载一次
     
 
-    TreeMailItem *parentItem;
+    MailTreeItem *parentItem;
 };
 
-#endif // TREEMAILITEM_H
+#endif // MAILTREEITEM_H

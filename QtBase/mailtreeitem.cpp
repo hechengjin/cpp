@@ -11,7 +11,7 @@
     A container for items of data supplied by the simple tree model.
 */
 
-#include "TreeMailItem.h"
+#include "mailtreeitem.h"
 #include <QDateTime>
 #include <QStringList>
 
@@ -20,31 +20,31 @@
 //    parentItem = parent;
 //    itemData = data;
 //}
-TreeMailItem::TreeMailItem(TreeMailItem *parent)
+MailTreeItem::MailTreeItem(MailTreeItem *parent)
 {
     parentItem = parent;
 }
 
-TreeMailItem::~TreeMailItem()
+MailTreeItem::~MailTreeItem()
 {
     qDeleteAll(childItems);
 }
 
 
-TreeMailItem *TreeMailItem::child(int number)
+MailTreeItem *MailTreeItem::child(int number)
 {
     return childItems.value(number);
 }
 
-int TreeMailItem::childCount() const
+int MailTreeItem::childCount() const
 {
     return childItems.count();
 }
 
-int TreeMailItem::childNumber() const
+int MailTreeItem::childNumber() const
 {
     if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<TreeMailItem*>(this));
+        return parentItem->childItems.indexOf(const_cast<MailTreeItem*>(this));
 
     return 0;
 }
@@ -54,7 +54,7 @@ int TreeMailItem::childNumber() const
 //    return itemData.count();
 //}
 
-QVariant TreeMailItem::data(int column) const
+QVariant MailTreeItem::data(int column) const
 {
     //return itemData.value(column);
     QVariant rv;
@@ -100,20 +100,20 @@ QVariant TreeMailItem::data(int column) const
 //    return true;
 //}
 
-TreeMailItem * TreeMailItem::insertChildren(int position, const MailListItemData & stMailListItemData)
+MailTreeItem * MailTreeItem::insertChildren(int position, const MailListItemData & stMailListItemData)
 {
     if (position < 0 || position > childItems.size())
         return NULL;
-    TreeMailItem *item = childExist(stMailListItemData);
+    MailTreeItem *item = childExist(stMailListItemData);
     if (!item)
     {
-        item = new TreeMailItem(this);
+        item = new MailTreeItem(this);
         item->setData(stMailListItemData);
         childItems.insert(position, item);
     }
     return item;
 }
-TreeMailItem *TreeMailItem::childExist(const MailListItemData & stMailListItemData)
+MailTreeItem *MailTreeItem::childExist(const MailListItemData & stMailListItemData)
 {
     if (stMailListItemData.itemType == MLIT_GROUP)
     {
@@ -152,12 +152,12 @@ TreeMailItem *TreeMailItem::childExist(const MailListItemData & stMailListItemDa
 //    return true;
 //}
 
-TreeMailItem *TreeMailItem::parent()
+MailTreeItem *MailTreeItem::parent()
 {
     return parentItem;
 }
 
-bool TreeMailItem::removeChildren(int position, int count)
+bool MailTreeItem::removeChildren(int position, int count)
 {
     if (position < 0 || position + count > childItems.size())
         return false;
@@ -193,7 +193,7 @@ bool TreeMailItem::removeChildren(int position, int count)
 //    return true;
 //}
 
-bool TreeMailItem::setData(const MailListItemData & stMailListItemData)
+bool MailTreeItem::setData(const MailListItemData & stMailListItemData)
 {
     stItemData = stMailListItemData;
     return true;

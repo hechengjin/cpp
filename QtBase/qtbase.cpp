@@ -6,8 +6,8 @@
 #include <iomanip>
 #include <bitset>
 #include "MemoryDBManager.h"
-#include "treemailmodel.h"
-#include "mailListTreeViewHeader.h"
+#include "mailtreemodel.h"
+#include "mailtreeviewHeader.h"
 #include <QSortFilterProxyModel>
 using namespace std;
 
@@ -27,20 +27,20 @@ QtBase::~QtBase()
 void QtBase::init()
 {
     CMemoryDBManager::instance()->init();
-    TreeMailModel::instance()->initRootItem();
-    TreeMailModel::instance()->loadData(m_mailListDisplayMode);
+    QMailTreeModel::instance()->initRootItem();
+    QMailTreeModel::instance()->loadData(m_mailListDisplayMode);
 
     //ui.mailListTreeView->setModel(TreeMailModel::instance());
     QSortFilterProxyModel *pProxyModel = new QSortFilterProxyModel(this);
-    pProxyModel->setSourceModel(TreeMailModel::instance());
+    pProxyModel->setSourceModel(QMailTreeModel::instance());
     ui.mailListTreeView->setModel(pProxyModel);
     // 设置可排序
     ui.mailListTreeView->setSortingEnabled(true);
     // 设置按照日期降序排列
     ui.mailListTreeView->sortByColumn(MLMC_Date, Qt::DescendingOrder);
 
-    ui.mailListTreeView->setHeader(new QMailListTreeViewHeader());
-    for (int column = 0; column < TreeMailModel::instance()->columnCount(); ++column)
+    ui.mailListTreeView->setHeader(new QMailTreeViewHeader());
+    for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
         ui.mailListTreeView->resizeColumnToContents(column);
 
     ui.mailListTreeView->setColumnHidden(MLMC_Priority, true);
