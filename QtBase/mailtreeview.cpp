@@ -5,6 +5,7 @@
 #include "mailtreeviewheader.h"
 #include "mailitemdelegate.h"
 #include <QMenu>
+#include <QToolTip>
 QMailTreeView::QMailTreeView(QWidget *parent)
     : QTreeView(parent)
 {
@@ -33,10 +34,12 @@ void QMailTreeView::init()
 
     //右键菜单设置
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-        this, SLOT(slotCustomContextMenu(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(slotCustomContextMenu(const QPoint &)));
     //支持多选 支持shift, ctrl, 鼠标框框等方式
     setSelectionMode(ExtendedSelection);
+    connect(this, SIGNAL(entered(const QModelIndex &)), this, SLOT(slotEntered(const QModelIndex &)));
+    //用于显示ToolTip
+    setMouseTracking(true);
     expandAll();
 }
 
@@ -51,6 +54,16 @@ void QMailTreeView::slotCustomContextMenu(const QPoint &pos)
     menu->addAction(tr("delete"), this, SLOT(slotDeleteMailClicked()));
     menu->exec(QCursor::pos());
     menu->deleteLater();
+}
+
+void QMailTreeView::slotEntered(const QModelIndex &index)
+{
+    if (!index.isValid())
+        return;
+
+    int nColumn = index.column();
+    if ((nColumn == MLMC_Size))
+        QToolTip::showText(QCursor::pos(), index.data().toString());
 }
 
 void QMailTreeView::slotDeleteMailClicked()

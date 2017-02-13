@@ -18,6 +18,7 @@ protected:
 protected slots:
     void slotCustomContextMenu(const QPoint &pos);
     void slotDeleteMailClicked();
+    void slotEntered(const QModelIndex &index);
 private:
     
 };
