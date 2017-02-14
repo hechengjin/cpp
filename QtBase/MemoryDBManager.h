@@ -13,7 +13,7 @@ public:
 
 public:
     MailHeaderInfo getMailHeader(uint64_t mailId);
-
+    bool deleteMailRecord(uint64_t mailId, uint32_t folderId = 1);
 public:
     void init();
 

@@ -18,6 +18,7 @@
 #include <QList>
 #include <QVector>
 #include <QMap>
+#include <QSet>
 #include "dataType.h"
 
 #pragma region 常量定义
@@ -228,6 +229,7 @@ struct MailListItemData
     , messageDate(NOT_SET_VALUE)
     , messageSize(NOT_SET_VALUE)
     , itemType(MLIT_UNKNOWN)
+    , folderId(DEFAULT_VALUE_ZERO)
     {
     }
     int itemType;
@@ -245,6 +247,7 @@ struct MailListItemData
     //分组时间范围
     uint64_t startTime; //开始时间
     uint64_t endTime; //结束时间
+    uint32_t folderId;
 
     //bool operator == (const MailListItemData &right) const
     //{
@@ -252,5 +255,54 @@ struct MailListItemData
     //}
 };
 #pragma endregion 邮件列表相关定义
+
+#pragma region 查询
+
+enum QueryOptionAttachment
+{
+    QOA_UNLIMITED = 0, //不限制
+    QOA_EXIST,    //有附件
+    QOA_WITHOUT // 无附件
+};
+
+enum QueryOptionTime
+{
+    QOT_UNLIMITED = 0, //不限制
+    QOT_TODAY,    //今天
+    QOT_IN3DAYS,    //三天内
+    QOT_INAWIIK,    //一周内
+    QOT_INAMONTH,    //一个月内
+    QOT_INAYEAR,    //一年内
+    QOT_SPECIFY    //自定义
+};
+
+
+struct QueryConditions
+{
+    QueryConditions()
+    : folderId(DEFAULT_VALUE_ZERO)
+    , query(false)
+    , attachmentOption(QOA_UNLIMITED)
+    , timeOption(QOT_UNLIMITED)
+    {
+    }
+    uint32_t folderId;
+    QString subject;
+    QString content;
+    QSet<uint64_t> authors;
+    QSet<uint64_t> recipients;
+    int attachmentOption;
+    QString attachmentName;
+    int timeOption;
+    uint64_t startTime;
+    uint64_t endTime;
+    bool query;//是否通过点查询按钮获取的数据
+
+    void reset()
+    {
+        folderId = DEFAULT_VALUE_ZERO;
+    }
+};
+#pragma endregion 查询
 
 #endif	//__DATADEFINE_H__

@@ -18,7 +18,8 @@ public:
     ~QtBase();
 
 protected:
-    void init();
+    void initData();
+    void initUI();
 private:
     int m_mailListDisplayMode;
 
@@ -29,6 +30,10 @@ private slots:
     void on_toReadTimePushButton_clicked();
     void on_toNumberTimePushButton_clicked();
     void on_bitPushButton_clicked();
+    void on_deleteMailPushButton_clicked();
+    void on_refreshPushButton_clicked();
+    void on_updateMailPushButton_clicked();
+    void on_queryPushButton_clicked();
 private:
     Ui::QtBaseClass ui;
 };

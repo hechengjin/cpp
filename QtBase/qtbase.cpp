@@ -9,14 +9,17 @@
 #include "mailtreemodel.h"
 #include "mailtreeviewHeader.h"
 #include <QSortFilterProxyModel>
+#include "mailsortfilterproxymodel.h"
+
 using namespace std;
 
 QtBase::QtBase(QWidget *parent)
     : QMainWindow(parent)
     , m_mailListDisplayMode(MLDM_CONVERSATION)
 {
-    init();
+    initData();
     ui.setupUi(this);
+    initUI();
     
 }
 
@@ -25,10 +28,10 @@ QtBase::~QtBase()
 
 }
 
-void QtBase::init()
+void QtBase::initData()
 {
     CMemoryDBManager::instance()->init();
-    QMailTreeModel::instance()->initRootItem();
+    
     QMailTreeModel::instance()->loadData(m_mailListDisplayMode);
 
     //ui.mailListTreeView->setModel(TreeMailModel::instance());
@@ -47,6 +50,13 @@ void QtBase::init()
     //ui.mailListTreeView->setColumnHidden(MLMC_Priority, true);
 
     //ui.mailListTreeView->expandAll();
+    
+
+}
+
+void QtBase::initUI()
+{
+    ui.deleteMailLineEdit->setText("10");
 }
 
 #pragma region 字符集测试
@@ -348,7 +358,46 @@ void QtBase::on_containerPushButton_clicked()
 
 
 #pragma region 邮件列表
+void QtBase::on_deleteMailPushButton_clicked()
+{
+    uint64_t   mailId = ui.deleteMailLineEdit->text().toULongLong();
+    MailListItemData stItemData;
+    stItemData.id = mailId;
+    if (QMailTreeModel::instance()->deleteRecord(stItemData))
+    {
+        CMemoryDBManager::instance()->deleteMailRecord(mailId);
+        ui.mailListTreeView->expandAll();
+    }
+}
+
+void QtBase::on_updateMailPushButton_clicked()
+{
+    uint64_t   mailId = ui.deleteMailLineEdit->text().toULongLong();
+    MailListItemData stItemData;
+    stItemData.id = mailId;
+    stItemData.name = "ttttttt";
+    if (QMailTreeModel::instance()->updateRecord(stItemData))
+    {
+        ui.mailListTreeView->expandAll();
+    }
+}
+
+void QtBase::on_refreshPushButton_clicked()
+{
+    QMailTreeModel::instance()->clear();
+    //QMailSortFilterProxyModel::instance()->clear();
+    //QMailTreeModel::instance()->loadData(m_mailListDisplayMode);
+    //QMailSortFilterProxyModel::instance()->setSourceModel(QMailTreeModel::instance());
+    //ui.mailListTreeView->setModel(QMailSortFilterProxyModel::instance());
+    //ui.mailListTreeView->expandAll();
+}
 
 
-
+void QtBase::on_queryPushButton_clicked()
+{
+    QueryConditions stQueryConditions;
+    stQueryConditions.folderId = ui.folderIdQueryLineEdit->text().toUInt();
+    stQueryConditions.query = true;
+    QMailSortFilterProxyModel::instance()->setQueryCondition(stQueryConditions);
+}
 #pragma endregion 邮件列表

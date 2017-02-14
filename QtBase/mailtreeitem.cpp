@@ -31,7 +31,6 @@ MailTreeItem::~MailTreeItem()
     qDeleteAll(childItems);
 }
 
-
 MailTreeItem *MailTreeItem::child(int number)
 {
     return childItems.value(number);
@@ -48,6 +47,32 @@ int MailTreeItem::childNumber() const
         return parentItem->childItems.indexOf(const_cast<MailTreeItem*>(this));
 
     return 0;
+}
+
+void MailTreeItem::clearChildItems()
+{
+    childItems.clear();
+}
+
+void MailTreeItem::removeItem(const MailListItemData & itemData)
+{
+    for (int i = 0; i < childItems.size(); ++i) {
+        if (childItems.at(i)->stItemData.id == itemData.id)
+        {
+            delete childItems.at(i);
+            childItems.removeAt(i);
+            break;
+        }
+    }
+}
+
+void MailTreeItem::removeAllItems()
+{
+    for (int i = 0; i < childItems.size(); ++i) 
+    {
+        delete childItems.at(i);
+        childItems.removeAt(i);
+    }
 }
 
 //int TreeMailItem::columnCount() const
@@ -89,6 +114,9 @@ QVariant MailTreeItem::data(int column, int role) const
                 }
                 case MLMC_Size:
                     rv = stItemData.messageSize;
+                    break;
+                case MLMC_Folder:
+                    rv = stItemData.folderId;
                     break;
                 default:
                     break;
@@ -184,7 +212,6 @@ bool MailTreeItem::removeChildren(int position, int count)
 
     for (int row = 0; row < count; ++row)
         delete childItems.takeAt(position);
-
     return true;
 }
 

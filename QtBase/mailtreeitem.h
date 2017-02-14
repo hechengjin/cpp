@@ -20,6 +20,7 @@ public:
     explicit MailTreeItem(MailTreeItem *parent = 0);
     ~MailTreeItem();
 
+
     MailTreeItem *child(int number);
     int childCount() const;
     //int columnCount() const;
@@ -35,6 +36,10 @@ public:
     //bool setData(int column, const QVariant &value);
     bool setData(const MailListItemData & stMailListItemData);
 
+    //
+    void clearChildItems();
+    void removeItem(const MailListItemData & itemData);
+    void removeAllItems();
 public:
     MailListItemData stItemData;
 private:

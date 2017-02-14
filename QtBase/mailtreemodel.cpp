@@ -9,7 +9,7 @@
 
 #include "mailtreeitem.h"
 #include "mailtreemodel.h"
-#include "MemoryDBManager.h"
+
 
 Q_GLOBAL_STATIC(QMailTreeModel, treeMailModel)
 QMailTreeModel *QMailTreeModel::instance()
@@ -20,6 +20,7 @@ QMailTreeModel *QMailTreeModel::instance()
 QMailTreeModel::QMailTreeModel(QObject *parent)
 : QAbstractItemModel(parent)
 , m_mailListDisplayMode(MLDM_CONVERSATION)
+, m_rootItem(NULL)
 {
 }
 
@@ -41,7 +42,138 @@ void QMailTreeModel::initRootItem()
 
 QMailTreeModel::~QMailTreeModel()
 {
-    delete m_rootItem;
+    clear();
+}
+
+void QMailTreeModel::clear()
+{
+   
+    if (m_rootItem)
+    {
+        clearRecords();
+        removeRows(0, m_rootItem->childCount());
+        //recursionClear(m_rootItem);
+        delete m_rootItem;
+        m_rootItem = NULL;
+    }
+}
+
+bool QMailTreeModel::updateRecord(const MailListItemData & stItemData)
+{
+    bool change = false;
+    for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
+    {
+        MailTreeItem *groupItem = m_rootItem->child(i);
+        for (int j = 0; j < groupItem->childCount(); j++)
+        {
+            MailTreeItem *conversationItem = groupItem->child(j);  //会话
+            for (int m = 0; m < conversationItem->childCount(); m++)
+            {
+                MailTreeItem *mailItem = conversationItem->child(m); //邮件
+                if (mailItem->stItemData.id == stItemData.id)
+                {
+                    mailItem->stItemData.name = stItemData.name;
+                    change = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (change)
+    {
+        resetModel();
+    }
+    return change;
+}
+
+bool QMailTreeModel::clearRecords()
+{
+    if (MLDM_CONVERSATION == m_mailListDisplayMode)
+    {
+        for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
+        {
+            MailTreeItem *groupItem = m_rootItem->child(i);
+            for (int j = 0; j < groupItem->childCount(); j++)
+            {
+                MailTreeItem *conversationItem = groupItem->child(j);  //会话
+                conversationItem->removeAllItems(); //会话下邮件删除
+                if (conversationItem->childCount() <= 0)
+                {
+                    groupItem->removeItem(conversationItem->stItemData); //分组下会话删除
+                }
+            }
+            if (groupItem->childCount() <= 0)
+            {
+                m_rootItem->removeItem(groupItem->stItemData); //分组删除
+            }
+        }
+    }
+    return true;
+}
+
+bool QMailTreeModel::deleteRecord(const MailListItemData & stItemData)
+{
+    bool change = false;
+    for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
+    {
+        MailTreeItem *groupItem = m_rootItem->child(i);
+        for (int j = 0; j < groupItem->childCount(); j++)
+        {
+            MailTreeItem *conversationItem = groupItem->child(j);  //会话
+            for (int m = 0; m < conversationItem->childCount(); m++)
+            {
+                MailTreeItem *mailItem = conversationItem->child(m); //邮件
+                if (mailItem->stItemData.id == stItemData.id)
+                {
+                    conversationItem->removeItem(stItemData);
+                    change = true;
+                    break;
+                }
+            }
+            if (conversationItem->childCount() <= 0)
+            {
+                groupItem->removeItem(conversationItem->stItemData);
+            }
+        }
+        if (groupItem->childCount() <= 0)
+        {
+            m_rootItem->removeItem(groupItem->stItemData);
+        }
+    }
+    if (change)
+    {
+        resetModel();
+    }
+    return change;
+}
+
+void QMailTreeModel::resetModel()
+{
+    beginResetModel();
+    endResetModel();
+}
+
+void QMailTreeModel::recursionClear(MailTreeItem *pItem)
+{
+    if (NULL == pItem)
+    {
+        return ;
+    }
+    if (pItem->childCount() > 0)
+    {
+        for (int row = 0; row < pItem->childCount(); ++row)
+        {
+            recursionClear(pItem->child(row));
+        }
+        pItem->clearChildItems();
+        recursionClear(pItem);
+    }
+    else
+    {
+        
+       delete pItem;
+        pItem = NULL;
+    }
 }
 
 QString generationGroupName(/*int dayOfWeek, */uint64_t mailDate)
@@ -75,7 +207,9 @@ QString generationGroupName(/*int dayOfWeek, */uint64_t mailDate)
 
 void QMailTreeModel::loadData(int mailListDisplayMode)
 {
+    
 #pragma region 初始化模型数据
+    initRootItem();
     m_mailListDisplayMode = mailListDisplayMode;
     MailListItemData stMailListItemData;
     MailHeaderInfo stMailHeaderInfo;
@@ -119,6 +253,7 @@ void QMailTreeModel::loadData(int mailListDisplayMode)
                         stMailListItemData.name = stMailHeaderInfo.Subject;
                         stMailListItemData.id = stMailHeaderInfo.Id;
                         stMailListItemData.messageSize = stMailHeaderInfo.messageSize;
+                        stMailListItemData.folderId = stMailHeaderInfo.folderId;
                         converItem->insertChildren(converItem->childCount(), stMailListItemData);
                     }
                     
@@ -155,7 +290,6 @@ QVariant QMailTreeModel::data(const QModelIndex &index, int role) const
 
     //if (role != Qt::DisplayRole && role !=UIROLE_ReadableSize)
     //    return QVariant();
-
     MailTreeItem *item = getItem(index);
 
     return item->data(index.column(), role);
@@ -244,8 +378,12 @@ QModelIndex QMailTreeModel::index(int row, int column, const QModelIndex &parent
 {
     if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
-
+    
     MailTreeItem *parentItem = getItem(parent);
+    if (NULL == parentItem)
+    {
+        return QModelIndex();
+    }
 
     MailTreeItem *childItem = parentItem->child(row);
     if (childItem)
@@ -321,6 +459,10 @@ bool QMailTreeModel::removeRows(int position, int rows, const QModelIndex &paren
 int QMailTreeModel::rowCount(const QModelIndex &parent) const
 {
     MailTreeItem *parentItem = getItem(parent);
+    if (NULL == parentItem)
+    {
+        return DEFAULT_VALUE_ZERO;
+    }
     if (parentItem->stItemData.itemType == MLIT_CONVERSATION)
     {
         int xx;

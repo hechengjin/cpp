@@ -37,7 +37,13 @@ void CMemoryDBManager::init()
         MailHeaderInfo stMailHeaderInfo;
         stMailHeaderInfo.Id = i + 1;
         stMailHeaderInfo.serverId = oneServerId;
-        stMailHeaderInfo.folderId = inboxFolderId;
+        if (i%2 == 0)
+        {
+            stMailHeaderInfo.folderId = inboxFolderId;
+        }
+        else
+            stMailHeaderInfo.folderId = 2;
+        
         //stMailHeaderInfo.messageId = messageID;
         stMailHeaderInfo.Subject = "Mail Subject:" + QString::number(i);
         //stMailHeaderInfo.uid = msgKey;
@@ -127,4 +133,18 @@ MailHeaderInfo CMemoryDBManager::getMailHeader(uint64_t mailId)
     }
     MailHeaderInfo stMailHeaderInfo;
     return stMailHeaderInfo;
+}
+
+bool CMemoryDBManager::deleteMailRecord(uint64_t mailId, uint32_t folderId)
+{
+    QMutexLocker locker(&m_mailMutex); //外面加个括号防止重新生成时死锁
+    for (int i = 0; i < m_mapMailMemoryData[folderId].vecMailHeaderDatas.size(); ++i)
+    {
+        if (m_mapMailMemoryData[folderId].vecMailHeaderDatas.at(i).Id == mailId)
+        {
+            m_mapMailMemoryData[folderId].vecMailHeaderDatas.erase(m_mapMailMemoryData[folderId].vecMailHeaderDatas.begin() + i);
+            break;
+        }
+    }
+    return true;
 }

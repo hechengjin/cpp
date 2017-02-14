@@ -1,5 +1,4 @@
 #include "mailsortfilterproxymodel.h"
-#include "dataDefine.h"
 
 Q_GLOBAL_STATIC(QMailSortFilterProxyModel, mailSortFilterProxyModel)
 QMailSortFilterProxyModel *QMailSortFilterProxyModel::instance()
@@ -17,6 +16,27 @@ QMailSortFilterProxyModel::QMailSortFilterProxyModel(QObject *parent)
 QMailSortFilterProxyModel::~QMailSortFilterProxyModel()
 {
 
+}
+
+bool QMailSortFilterProxyModel::filterAcceptsRow(int sourceRow,
+    const QModelIndex &sourceParent) const
+{
+    QModelIndex indexItemType = sourceModel()->index(sourceRow, MLMC_ItemType, sourceParent);
+    QModelIndex indexFolderId = sourceModel()->index(sourceRow, MLMC_Folder, sourceParent);
+    int itemType = sourceModel()->data(indexItemType).toInt();    
+    if (!m_stQueryConditions.query)
+    {
+        return true;
+    }
+    if (MLIT_GROUP == itemType)
+    {
+        return true;
+    }
+    if (MLIT_CONVERSATION == itemType)
+    {
+        return true;
+    }
+    return (sourceModel()->data(indexFolderId).toUInt() == m_stQueryConditions.folderId );
 }
 
 bool QMailSortFilterProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
@@ -37,4 +57,10 @@ bool QMailSortFilterProxyModel::lessThan(const QModelIndex &source_left, const Q
     }
 
     return QSortFilterProxyModel::lessThan(source_left, source_right);
+}
+
+void QMailSortFilterProxyModel::setQueryCondition(const QueryConditions & stQueryConditions)
+{
+    m_stQueryConditions = stQueryConditions;
+    invalidateFilter();
 }

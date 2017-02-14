@@ -11,6 +11,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
+#include "MemoryDBManager.h"
 
 class CMemoryDBManager;
 class MailTreeItem;
@@ -30,6 +31,7 @@ public:
     static QMailTreeModel* instance();
     void initRootItem();
     void loadData(int mailListDisplayMode);
+    void clear();
 
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -59,12 +61,20 @@ public:
     bool removeRows(int position, int rows,
         const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
 
+    void resetModel();
+    bool deleteRecord(const MailListItemData & stItemData);
+    bool updateRecord(const MailListItemData & stItemData);
+    bool clearRecords();
+
 private:
     //void setupModelData(const QStringList &lines, TreeMailItem *parent);
     MailTreeItem *getItem(const QModelIndex &index) const;
     MailTreeItem *getParentItem(const QString & groupName);
+    void recursionClear(MailTreeItem *pItem);
     MailTreeItem *m_rootItem;
     int m_mailListDisplayMode;
+    
+    //QMutex  m_modelMutex;
 };
 //! [2]
 
