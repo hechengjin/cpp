@@ -14,13 +14,13 @@ public:
     ~QMailSortFilterProxyModel();
     static QMailSortFilterProxyModel* instance();
 
-    void setQueryCondition(const QueryConditions & stQueryConditions);
+    void invalidProxyModel(const QueryConditions & stQueryConditions);
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
     virtual bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const;
 private:
-    QueryConditions m_stQueryConditions;
+    QueryConditions m_queryConditions;
 };
 
 #endif // MAILSORTFILTERPROXYMODEL_H

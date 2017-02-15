@@ -24,7 +24,7 @@ bool QMailSortFilterProxyModel::filterAcceptsRow(int sourceRow,
     QModelIndex indexItemType = sourceModel()->index(sourceRow, MLMC_ItemType, sourceParent);
     QModelIndex indexFolderId = sourceModel()->index(sourceRow, MLMC_Folder, sourceParent);
     int itemType = sourceModel()->data(indexItemType).toInt();    
-    if (!m_stQueryConditions.query)
+    if (!m_queryConditions.query)
     {
         return true;
     }
@@ -36,7 +36,7 @@ bool QMailSortFilterProxyModel::filterAcceptsRow(int sourceRow,
     {
         return true;
     }
-    return (sourceModel()->data(indexFolderId).toUInt() == m_stQueryConditions.folderId );
+    return (sourceModel()->data(indexFolderId).toUInt() == m_queryConditions.folderId);
 }
 
 bool QMailSortFilterProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
@@ -44,23 +44,37 @@ bool QMailSortFilterProxyModel::lessThan(const QModelIndex &source_left, const Q
     if (!source_left.isValid() || !source_right.isValid())
         return false;
 
-    if ((source_left.column() == MLMC_Size) && (source_right.column() == MLMC_Size))
+    //if ((source_left.column() == MLMC_Size) && (source_right.column() == MLMC_Size))
+    //{
+    //    // 这里我们所取得数据是用户源数据
+    //    QVariant leftData = sourceModel()->data(source_left, UIROLE_ReadableSize);
+    //    QVariant rightData = sourceModel()->data(source_right, UIROLE_ReadableSize);
+
+    //    if (leftData.canConvert<qint64>() && rightData.canConvert<qint64>())
+    //    {
+    //        return leftData.toLongLong() < rightData.toLongLong();
+    //    }
+    //}
+    switch (m_queryConditions.curSortColumn)
     {
-        // 这里我们所取得数据是用户源数据
-        QVariant leftData = sourceModel()->data(source_left, UIROLE_ReadableSize);
-        QVariant rightData = sourceModel()->data(source_right, UIROLE_ReadableSize);
-
-        if (leftData.canConvert<qint64>() && rightData.canConvert<qint64>())
+        case MLMC_Size:
         {
-            return leftData.toLongLong() < rightData.toLongLong();
-        }
-    }
+            QVariant leftData = sourceModel()->data(source_left, UIROLE_ReadableSize);
+            QVariant rightData = sourceModel()->data(source_right, UIROLE_ReadableSize);
 
+            if (leftData.canConvert<qint64>() && rightData.canConvert<qint64>())
+            {
+                return leftData.toLongLong() < rightData.toLongLong();
+            }
+        }
+    default:
+        break;
+    }
     return QSortFilterProxyModel::lessThan(source_left, source_right);
 }
 
-void QMailSortFilterProxyModel::setQueryCondition(const QueryConditions & stQueryConditions)
+void QMailSortFilterProxyModel::invalidProxyModel(const QueryConditions & stQueryConditions)
 {
-    m_stQueryConditions = stQueryConditions;
+    m_queryConditions = stQueryConditions;
     invalidateFilter();
 }

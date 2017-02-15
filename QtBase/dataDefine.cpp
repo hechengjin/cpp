@@ -11,3 +11,8 @@ QString bytesToGBMBKB(qint64 size)
     else
         return QString("%1 Bytes").arg(size);
 }
+
+uint qHash(const QuerySummaryInfo key)
+{
+    return key.id/* + key.date*/; //∞¥»’∆⁄≈≈–Ú
+}

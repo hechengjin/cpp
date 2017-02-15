@@ -44,6 +44,7 @@ public:
     MailListItemData stItemData;
 private:
     QList<MailTreeItem*> childItems; //所有子行数据
+    QMutex  m_childItemMutex;
     //QVector<QVariant> itemData;  //当前行每列的数据  itemData[column] = value; //排序如何处理？  //重新加载一次
     
 

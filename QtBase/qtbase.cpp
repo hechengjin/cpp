@@ -20,6 +20,7 @@ QtBase::QtBase(QWidget *parent)
     initData();
     ui.setupUi(this);
     initUI();
+    signalSlotConnection();
     
 }
 
@@ -31,9 +32,6 @@ QtBase::~QtBase()
 void QtBase::initData()
 {
     CMemoryDBManager::instance()->init();
-    
-    QMailTreeModel::instance()->loadData(m_mailListDisplayMode);
-
     //ui.mailListTreeView->setModel(TreeMailModel::instance());
     //QSortFilterProxyModel *pProxyModel = new QSortFilterProxyModel(this);
     //pProxyModel->setSourceModel(QMailTreeModel::instance());
@@ -44,20 +42,30 @@ void QtBase::initData()
     //ui.mailListTreeView->sortByColumn(MLMC_Date, Qt::DescendingOrder);
 
     //ui.mailListTreeView->setHeader(new QMailTreeViewHeader());
-    //for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
-    //    ui.mailListTreeView->resizeColumnToContents(column);
+    
 
     //ui.mailListTreeView->setColumnHidden(MLMC_Priority, true);
 
     //ui.mailListTreeView->expandAll();
-    
+    int xxx;
+    xxx++;
 
 }
+
+
 
 void QtBase::initUI()
 {
     ui.deleteMailLineEdit->setText("10");
+
+    on_queryPushButton_clicked();
 }
+
+void QtBase::signalSlotConnection()
+{
+    connect(ui.mailListTreeView, SIGNAL(signalMailSelectionChanged(const MailListSelectData &)), this, SLOT(onMailListSelectChanged(const MailListSelectData &)), Qt::QueuedConnection);
+}
+
 
 #pragma region 字符集测试
 
@@ -202,31 +210,17 @@ void QtBase::on_bitPushButton_clicked()
 
 #pragma region 容器测试
 
-struct QuerySummaryInfo
-{
-    uint64_t mailId;
-    uint64_t data;
-    uint32_t messageSize; //大小
-    bool operator == (const QuerySummaryInfo &right) const
-    {
-        return (mailId == right.mailId/* && data == right.data*/);
-    }
-};
 
-uint qHash(const QuerySummaryInfo key)
-{
-    return key.mailId/* + key.data */; //按日期排序
-}
 
-bool compQuerySummaryAsc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
-{
-    return qs1.data < qs2.data;
-}
-
-bool compQuerySummaryDesc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
-{
-    return qs1.data > qs2.data;
-}
+//bool compQuerySummaryAsc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
+//{
+//    return qs1.data < qs2.data;
+//}
+//
+//bool compQuerySummaryDesc(const QuerySummaryInfo& qs1, const QuerySummaryInfo& qs2)
+//{
+//    return qs1.data > qs2.data;
+//}
 
 void QtBase::on_containerPushButton_clicked()
 {
@@ -235,7 +229,7 @@ void QtBase::on_containerPushButton_clicked()
     //1. bool operator == (const Type &b) const
     //2. 一个全局的uint qHash(Type key)函数
     //QSet有序测试
-
+    /*
 
     QSet<QuerySummaryInfo> setQuerySummarys;
     QuerySummaryInfo stQuerySummaryInfo;
@@ -352,6 +346,7 @@ void QtBase::on_containerPushButton_clicked()
         qDebug() << (*iter2).mailId << " " << (*iter2).data << " " << (*iter2).messageSize;
         ++iter2;
     }
+    */
 }
 
 #pragma endregion 容器测试
@@ -366,7 +361,7 @@ void QtBase::on_deleteMailPushButton_clicked()
     if (QMailTreeModel::instance()->deleteRecord(stItemData))
     {
         CMemoryDBManager::instance()->deleteMailRecord(mailId);
-        ui.mailListTreeView->expandAll();
+        onRefreshAccountMails();
     }
 }
 
@@ -375,10 +370,10 @@ void QtBase::on_updateMailPushButton_clicked()
     uint64_t   mailId = ui.deleteMailLineEdit->text().toULongLong();
     MailListItemData stItemData;
     stItemData.id = mailId;
-    stItemData.name = "ttttttt";
+    //stItemData.name = "ttttttt";
     if (QMailTreeModel::instance()->updateRecord(stItemData))
     {
-        ui.mailListTreeView->expandAll();
+        onRefreshAccountMails();
     }
 }
 
@@ -396,8 +391,76 @@ void QtBase::on_refreshPushButton_clicked()
 void QtBase::on_queryPushButton_clicked()
 {
     QueryConditions stQueryConditions;
+    stQueryConditions.mailListDisplayMode = MLDM_MAIL;//MLDM_CONVERSATION; MLDM_MAIL
+    stQueryConditions.curSortColumn = MLMC_Date;
     stQueryConditions.folderId = ui.folderIdQueryLineEdit->text().toUInt();
     stQueryConditions.query = true;
-    QMailSortFilterProxyModel::instance()->setQueryCondition(stQueryConditions);
+    //QMailSortFilterProxyModel::instance()->setQueryCondition(stQueryConditions);
+    QMailTreeModel::instance()->queryData(stQueryConditions);
+    onRefreshAccountMails();
+    for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
+        ui.mailListTreeView->resizeColumnToContents(column);
 }
+
+void QtBase::on_AddPushButton_clicked()
+{
+    /*
+    QModelIndex index = ui.mailListTreeView->selectionModel()->currentIndex();
+    QAbstractItemModel *model = ui.mailListTreeView->model();
+
+    if (!model->insertRow(index.row() + 1, index.parent()))
+        return;
+
+    //updateActions();
+    MailListItemData stMailListItemData;
+    stMailListItemData.id = 100;
+    stMailListItemData.name = ui.titleQueryLineEdit->text();
+    QModelIndex child = QMailTreeModel::instance()->index(index.row() + 1, MLMC_Subject, index.parent());
+    QMailTreeModel::instance()->setData(child, stMailListItemData);
+    */
+
+    uint64_t   mailId = ui.deleteMailLineEdit->text().toULongLong();
+    MailHeaderInfo stMailHeaderInfo;
+    QDate now = QDate::currentDate();
+    QDateTime mailDate(QDate(now.year(), now.month(), now.day()), QTime(10, 10, 10));
+    stMailHeaderInfo.date = mailDate.toTime_t();
+    stMailHeaderInfo.id = mailId;
+    stMailHeaderInfo.folderId = 1;
+    stMailHeaderInfo.conversationId = 1;
+    stMailHeaderInfo.Subject = ui.titleQueryLineEdit->text();    
+    if (CMemoryDBManager::instance()->addMailRecord(stMailHeaderInfo))
+    {
+        QMailTreeModel::instance()->queryData();
+        onRefreshAccountMails();
+    }
+}
+
+void QtBase::onMailListSelectChanged(const MailListSelectData & stMailListSelectData)
+{
+    MailListSelectItemData stMailListSelectItemData;
+    for (int i = 0; i < stMailListSelectData.vecselectItemDatas.length(); i++)
+    {
+        stMailListSelectItemData = stMailListSelectData.vecselectItemDatas.at(i);
+        if (stMailListSelectItemData.itemType == MLIT_MAIL)
+        {
+            MailHeaderInfo stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader(stMailListSelectItemData.id);
+            ui.statusLabel->setText(stMailHeaderInfo.Subject);
+        }
+        else if (stMailListSelectItemData.itemType == MLIT_CONVERSATION)
+        {
+            ui.statusLabel->setText("conversation");
+        }
+        else
+        {
+            ui.statusLabel->setText("group");
+        }
+        
+    }
+}
+
+void QtBase::onRefreshAccountMails()
+{
+    ui.mailListTreeView->expandAll();
+}
+
 #pragma endregion 邮件列表

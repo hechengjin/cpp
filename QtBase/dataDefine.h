@@ -20,6 +20,7 @@
 #include <QMap>
 #include <QSet>
 #include "dataType.h"
+#include <QTime>
 
 #pragma region 常量定义
 
@@ -32,14 +33,16 @@ const int GB = 1024 * 1024 * 1024;
 const int MB = 1024 * 1024;
 const int KB = 1024;
 
+
+#define MAIL_SIZE_25K (25 * 1024)
+#define MAIL_SIZE_100K (100 * 1024)
+#define MAIL_SIZE_500K (500 * 1024)
+#define MAIL_SIZE_1M (1 * 1024 * 1024)
+#define MAIL_SIZE_5M (5 * 1024 * 1024)
+
 #pragma endregion 常量定义
 
 
-#pragma region 函数定义
-
-QString bytesToGBMBKB(qint64 size);
-
-#pragma endregion 函数定义
 
 
 
@@ -50,11 +53,11 @@ QString bytesToGBMBKB(qint64 size);
 struct MailHeaderInfo
 {
     MailHeaderInfo()
-    :Id(DEFAULT_VALUE_ZERO) //64位的整数
-    , serverId(NOT_SET_VALUE)
-    , folderId(NOT_SET_VALUE)
+    :id(DEFAULT_VALUE_ZERO) //64位的整数
+    , serverId(DEFAULT_VALUE_ZERO)
+    , folderId(DEFAULT_VALUE_ZERO)
     , indexPop(NOT_SET_VALUE)
-    , conversationId(NOT_SET_VALUE)
+    , conversationId(DEFAULT_VALUE_ZERO)
     , date(NOT_SET_VALUE)
     , messageSize(NOT_SET_VALUE)
     , flags(NOT_SET_VALUE)
@@ -63,7 +66,7 @@ struct MailHeaderInfo
     {
     }
 
-    uint64_t Id; //邮件id或会话id
+    uint64_t id; //邮件id或会话id
     uint32_t serverId;
     uint32_t folderId;
     QString messageId;
@@ -85,7 +88,7 @@ struct MailHeaderInfo
     QString changeKey;
     void clear()
     {
-        Id = DEFAULT_VALUE_ZERO;
+        id = DEFAULT_VALUE_ZERO;
         Subject.clear();
         author.clear();
         recipients.clear();
@@ -96,7 +99,7 @@ struct MailHeaderInfo
 
     MailHeaderInfo& operator=(const MailHeaderInfo &rhs)
     {
-        Id = rhs.Id;
+        id = rhs.id;
         serverId = rhs.serverId;
         folderId = rhs.folderId;
         messageId = rhs.messageId;
@@ -126,10 +129,10 @@ struct MailConversationInfo : MailHeaderInfo
     :MailHeaderInfo() 
     {
     }
-    QList<uint64_t> listConversationMailIds;
+    QSet<uint64_t> conversationMailIds;
     MailConversationInfo& operator=(const MailHeaderInfo &rhs)
     {
-        Id = rhs.Id;
+        id = rhs.id;
         serverId = rhs.serverId;
         folderId = rhs.folderId;
         messageId = rhs.messageId;
@@ -153,9 +156,47 @@ struct MailConversationInfo : MailHeaderInfo
     }
 };
 
+
+struct MailGroupInfo
+{
+    MailGroupInfo()
+    {
+    }
+    uint32_t id;
+    QString name;
+};
+
 #pragma endregion 内存与数据库表对应结构定义
 
 #pragma region 内存数据
+
+
+/**
+* 邮件标志位
+*/
+enum MailFlag : uint32_t
+{
+    MF_Read = 0x00000001,
+    MF_Replied = 0x00000002,
+    MF_Starred = 0x00000004,
+    MF_Expunged = 0x00000008,
+    MF_LocalKeep = 0x00000010,
+    MF_NoSync = 0x00000020,
+    MF_CacheData = 0x00000040,
+    MF_Offline = 0x0000080,
+    MF_Queued = 0x00000100,
+    MF_Forwarded = 0x00000200,
+    MF_New = 0x00000400,
+    MF_MDNReportNeeded = 0x00000800,
+    MF_MDNReportSent = 0x00001000,
+    MF_Template = 0x00002000,
+    MF_Attachment = 0x00004000,
+    MF_Preview = 0x00008000,
+    MF_DateOnly = 0x00010000,
+    MF_Deleted = 0x00020000,
+    MF_HIDDEN = 0x00040000
+};
+
 
 struct MemoryMailData
 {
@@ -226,34 +267,59 @@ struct MailListItemData
 {
     MailListItemData()
     :id(DEFAULT_VALUE_ZERO) //64位的整数
-    , messageDate(NOT_SET_VALUE)
-    , messageSize(NOT_SET_VALUE)
-    , itemType(MLIT_UNKNOWN)
-    , folderId(DEFAULT_VALUE_ZERO)
+    , itemType(MLIT_MAIL)
+    //, messageDate(NOT_SET_VALUE)
+    //, messageSize(NOT_SET_VALUE)
+    //, itemType(MLIT_UNKNOWN)
+    //, folderId(DEFAULT_VALUE_ZERO)
     {
     }
     int itemType;
     uint64_t id;   //itemType不同代表不同的项id
-    uint64_t messageDate; //邮件时间
+    //uint64_t messageDate; //邮件时间
     //会话会根据其下的邮件产生一个虚拟的邮件作为会话显示【会话邮件】（其信息来自相关邮件的整合）
     //如：5个标题相同的邮件 新产生一个做为组代表，其下显示五个
     //一个会话下只有一个邮件也会产生一个【会话邮件】其信息和邮件本身相同 点击等同邮件
-    QString name; //分组名 标题名
+    //QString name; //分组名 标题名
     //uint64_t newestMailId;
     //uint64_t oldestMailId;
     //messageIds 会话中的所有邮件
-    uint32_t flags; //若为会话，则根据其下所有邮件计算而得，如有一个有附件，则这个会话就有附件
-    uint32_t messageSize; //邮件大小  会话要取和
+    //uint32_t flags; //若为会话，则根据其下所有邮件计算而得，如有一个有附件，则这个会话就有附件
+    //uint32_t messageSize; //邮件大小  会话要取和
     //分组时间范围
-    uint64_t startTime; //开始时间
-    uint64_t endTime; //结束时间
-    uint32_t folderId;
+    //uint64_t startTime; //开始时间
+    //uint64_t endTime; //结束时间
+    //uint32_t folderId;
 
     //bool operator == (const MailListItemData &right) const
     //{
     //    return (mailId == right.mailId);
     //}
 };
+
+
+/**
+*
+*/
+struct MailListSelectItemData
+{
+    MailListSelectItemData()
+    : id(DEFAULT_VALUE_ZERO) //64位的整数
+    , itemType(MLIT_UNKNOWN)
+    {
+    }
+    int itemType;
+    uint64_t id;   //itemType不同代表不同的项id
+};
+
+struct MailListSelectData
+{
+    MailListSelectData()
+    {
+    }
+    QVector<MailListSelectItemData> vecselectItemDatas;
+};
+
 #pragma endregion 邮件列表相关定义
 
 #pragma region 查询
@@ -284,6 +350,9 @@ struct QueryConditions
     , query(false)
     , attachmentOption(QOA_UNLIMITED)
     , timeOption(QOT_UNLIMITED)
+    , mailListDisplayMode(MLDM_CONVERSATION)
+    , needAsynQuery(false)
+    , curSortColumn(MLMC_Date)
     {
     }
     uint32_t folderId;
@@ -296,6 +365,9 @@ struct QueryConditions
     int timeOption;
     uint64_t startTime;
     uint64_t endTime;
+    int mailListDisplayMode;
+    int curSortColumn;
+    bool needAsynQuery;
     bool query;//是否通过点查询按钮获取的数据
 
     void reset()
@@ -303,6 +375,62 @@ struct QueryConditions
         folderId = DEFAULT_VALUE_ZERO;
     }
 };
+
+
+struct QuerySummaryInfo
+{
+    QuerySummaryInfo()
+    : id(DEFAULT_VALUE_ZERO)
+    , conversationId(DEFAULT_VALUE_ZERO)
+    //, date(DEFAULT_VALUE_ZERO)
+    //, messageSize(DEFAULT_VALUE_ZERO)
+    {
+    }
+    uint64_t id;
+    uint32_t conversationId;
+    //uint64_t date; //时间
+    //uint32_t messageSize; //大小
+    bool operator == (const QuerySummaryInfo &right) const
+    {
+        return (id == right.id/* && date == right.date && messageSize == right.messageSize*/);
+    }
+};
+
+
+/**
+* 查询标志位
+*/
+enum QueryMailFlag : uint32_t
+{
+    QMF_NONE = 0x00000000,
+    QMF_FOLDER = 0x00000001,  //邮件夹查询条件判断
+    QMF_SUBJECT = 0x00000002, //标题
+    QMF_AUTHOR = 0x00000004, //发件人
+    QMF_RECIPIENTS = 0x00000008, //收件人
+    QMF_TIME = 0x00000010, //时间
+    QMF_NoSync = 0x00000020,
+    QMF_CacheData = 0x00000040,
+    QMF_Offline = 0x0000080,
+    QMF_Queued = 0x00000100,
+    QMF_Forwarded = 0x00000200,
+    QMF_New = 0x00000400,
+    QMF_MDNReportNeeded = 0x00000800,
+    QMF_MDNReportSent = 0x00001000,
+    QMF_Template = 0x00002000,
+    QMF_ATTACHMENT = 0x00004000,  //附件
+    QMF_Preview = 0x00008000,
+    QMF_DateOnly = 0x00010000,
+    QMF_Deleted = 0x00020000,
+    QMF_HIDDEN = 0x00040000
+};
+
 #pragma endregion 查询
+
+#pragma region 函数定义
+
+QString bytesToGBMBKB(qint64 size);
+uint qHash(const QuerySummaryInfo key);
+#pragma endregion 函数定义
+
 
 #endif	//__DATADEFINE_H__

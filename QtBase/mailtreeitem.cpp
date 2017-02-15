@@ -15,6 +15,7 @@
 #include <QDateTime>
 #include <QStringList>
 #include <QColor>
+#include "MemoryDBManager.h"
 
 //TreeMailItem::TreeMailItem(const QVector<QVariant> &data, TreeMailItem *parent)
 //{
@@ -28,21 +29,25 @@ MailTreeItem::MailTreeItem(MailTreeItem *parent)
 
 MailTreeItem::~MailTreeItem()
 {
+    QMutexLocker locker(&m_childItemMutex);
     qDeleteAll(childItems);
 }
 
 MailTreeItem *MailTreeItem::child(int number)
 {
+    //QMutexLocker locker(&m_childItemMutex);
     return childItems.value(number);
 }
 
 int MailTreeItem::childCount() const
 {
+    //QMutexLocker locker(&m_childItemMutex);
     return childItems.count();
 }
 
 int MailTreeItem::childNumber() const
 {
+    //QMutexLocker locker(&m_childItemMutex);
     if (parentItem)
         return parentItem->childItems.indexOf(const_cast<MailTreeItem*>(this));
 
@@ -51,27 +56,34 @@ int MailTreeItem::childNumber() const
 
 void MailTreeItem::clearChildItems()
 {
+    QMutexLocker locker(&m_childItemMutex);
     childItems.clear();
 }
 
 void MailTreeItem::removeItem(const MailListItemData & itemData)
 {
-    for (int i = 0; i < childItems.size(); ++i) {
-        if (childItems.at(i)->stItemData.id == itemData.id)
+    QMutexLocker locker(&m_childItemMutex);
+    for (auto it = childItems.begin(); it != childItems.end(); /* don't increment here */) {
+        if ((*it)->stItemData.id == itemData.id)
         {
-            delete childItems.at(i);
-            childItems.removeAt(i);
+            delete (*it);
+            it = childItems.erase(it);
             break;
+        }
+        else
+        {
+            ++it;
         }
     }
 }
 
 void MailTreeItem::removeAllItems()
 {
-    for (int i = 0; i < childItems.size(); ++i) 
+    QMutexLocker locker(&m_childItemMutex);
+    for (auto it = childItems.begin(); it != childItems.end(); /* don't increment here */)
     {
-        delete childItems.at(i);
-        childItems.removeAt(i);
+        delete (*it);
+        it = childItems.erase(it);
     }
 }
 
@@ -102,21 +114,23 @@ QVariant MailTreeItem::data(int column, int role) const
                     break;
 
                 case MLMC_Subject:
-                    rv = stItemData.name;
+                    rv = CMemoryDBManager::instance()->getSubject(stItemData);
                     break;
 
                 case MLMC_Date:
                 {
                     QDateTime maillDateTime;
-                    maillDateTime.setTime_t(stItemData.messageDate);
+                    uint64_t messageDate = CMemoryDBManager::instance()->getTime(stItemData);
+                    maillDateTime.setTime_t(messageDate);
                     rv = maillDateTime;
                     break;
                 }
                 case MLMC_Size:
-                    rv = stItemData.messageSize;
+                    rv = CMemoryDBManager::instance()->getSize(stItemData);
                     break;
                 case MLMC_Folder:
-                    rv = stItemData.folderId;
+                    //rv = stItemData.folderId;
+                    rv = CMemoryDBManager::instance()->getFolderId(stItemData);
                     break;
                 default:
                     break;
@@ -126,7 +140,7 @@ QVariant MailTreeItem::data(int column, int role) const
         {
             if (MLMC_Size == column)
             {
-                rv = stItemData.messageSize;
+                rv = CMemoryDBManager::instance()->getSize(stItemData);
             }
         }
     }
@@ -150,9 +164,11 @@ QVariant MailTreeItem::data(int column, int role) const
 
 MailTreeItem * MailTreeItem::insertChildren(int position, const MailListItemData & stMailListItemData)
 {
+    
     if (position < 0 || position > childItems.size())
         return NULL;
     MailTreeItem *item = childExist(stMailListItemData);
+    //QMutexLocker locker(&m_childItemMutex);
     if (!item)
     {
         item = new MailTreeItem(this);
@@ -163,26 +179,33 @@ MailTreeItem * MailTreeItem::insertChildren(int position, const MailListItemData
 }
 MailTreeItem *MailTreeItem::childExist(const MailListItemData & stMailListItemData)
 {
-    if (stMailListItemData.itemType == MLIT_GROUP)
+    for (int i = 0; i < childCount(); i++)
     {
-        for (int i = 0; i < childCount(); i++)
+        if (child(i)->stItemData.itemType == stMailListItemData.itemType && child(i)->stItemData.id == stMailListItemData.id)
         {
-            if (child(i)->stItemData.itemType == stMailListItemData.itemType && child(i)->stItemData.name == stMailListItemData.name)
-            {
-                return child(i);
-            }
+            return child(i);
         }
     }
-    else if (stMailListItemData.itemType == MLIT_MAIL)
-    {
-        for (int i = 0; i < childCount(); i++)
-        {
-            if (child(i)->stItemData.itemType == stMailListItemData.itemType && child(i)->stItemData.id == stMailListItemData.id)
-            {
-                return child(i);
-            }
-        }
-    }
+    //if (stMailListItemData.itemType == MLIT_GROUP)
+    //{
+    //    for (int i = 0; i < childCount(); i++)
+    //    {
+    //        if (child(i)->stItemData.itemType == stMailListItemData.itemType && child(i)->stItemData.name == stMailListItemData.name)
+    //        {
+    //            return child(i);
+    //        }
+    //    }
+    //}
+    //else if (stMailListItemData.itemType == MLIT_MAIL)
+    //{
+    //    for (int i = 0; i < childCount(); i++)
+    //    {
+    //        if (child(i)->stItemData.itemType == stMailListItemData.itemType && child(i)->stItemData.id == stMailListItemData.id)
+    //        {
+    //            return child(i);
+    //        }
+    //    }
+    //}
     return NULL;
 }
 
@@ -207,6 +230,7 @@ MailTreeItem *MailTreeItem::parent()
 
 bool MailTreeItem::removeChildren(int position, int count)
 {
+    QMutexLocker locker(&m_childItemMutex);
     if (position < 0 || position + count > childItems.size())
         return false;
 

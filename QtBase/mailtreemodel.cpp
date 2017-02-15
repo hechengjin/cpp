@@ -6,9 +6,10 @@
 ****************************************************************************/
 
 #include <QtWidgets>
+#include <QDebug>
 
-#include "mailtreeitem.h"
 #include "mailtreemodel.h"
+#include "mailsortfilterproxymodel.h"
 
 
 Q_GLOBAL_STATIC(QMailTreeModel, treeMailModel)
@@ -19,7 +20,6 @@ QMailTreeModel *QMailTreeModel::instance()
 
 QMailTreeModel::QMailTreeModel(QObject *parent)
 : QAbstractItemModel(parent)
-, m_mailListDisplayMode(MLDM_CONVERSATION)
 , m_rootItem(NULL)
 {
 }
@@ -50,11 +50,10 @@ void QMailTreeModel::clear()
    
     if (m_rootItem)
     {
-        clearRecords();
+        //clearRecords();
         removeRows(0, m_rootItem->childCount());
-        //recursionClear(m_rootItem);
-        delete m_rootItem;
-        m_rootItem = NULL;
+        //delete m_rootItem;
+        //m_rootItem = NULL;
     }
 }
 
@@ -72,7 +71,7 @@ bool QMailTreeModel::updateRecord(const MailListItemData & stItemData)
                 MailTreeItem *mailItem = conversationItem->child(m); //邮件
                 if (mailItem->stItemData.id == stItemData.id)
                 {
-                    mailItem->stItemData.name = stItemData.name;
+                    //mailItem->stItemData.name = stItemData.name;
                     change = true;
                     break;
                 }
@@ -88,7 +87,7 @@ bool QMailTreeModel::updateRecord(const MailListItemData & stItemData)
 
 bool QMailTreeModel::clearRecords()
 {
-    if (MLDM_CONVERSATION == m_mailListDisplayMode)
+    if (MLDM_CONVERSATION == m_queryConditions.mailListDisplayMode)
     {
         for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
         {
@@ -107,6 +106,10 @@ bool QMailTreeModel::clearRecords()
                 m_rootItem->removeItem(groupItem->stItemData); //分组删除
             }
         }
+    }
+    else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
+    {
+        m_rootItem->removeAllItems();
     }
     return true;
 }
@@ -153,122 +156,385 @@ void QMailTreeModel::resetModel()
     endResetModel();
 }
 
-void QMailTreeModel::recursionClear(MailTreeItem *pItem)
+
+QString QMailTreeModel::querySizeGroupName(uint32_t messageSize)
 {
-    if (NULL == pItem)
+    QString sizeGroupName;
+    if (messageSize < MAIL_SIZE_25K)
     {
-        return ;
+        sizeGroupName = QObject::tr("Minute (<25K)"); //微小(<25K)
     }
-    if (pItem->childCount() > 0)
+    else if (messageSize >= MAIL_SIZE_25K && messageSize < MAIL_SIZE_100K)
     {
-        for (int row = 0; row < pItem->childCount(); ++row)
-        {
-            recursionClear(pItem->child(row));
-        }
-        pItem->clearChildItems();
-        recursionClear(pItem);
+        sizeGroupName = QObject::tr("Small (100K - 25K)");//"小(25K - 100K)"
     }
-    else
+    else if (messageSize >= MAIL_SIZE_100K && messageSize < MAIL_SIZE_500K)
     {
-        
-       delete pItem;
-        pItem = NULL;
+        sizeGroupName = QObject::tr("Medium (500K - 100K)");//"中(100K - 500K)"
     }
+    else if (messageSize >= MAIL_SIZE_500K && messageSize < MAIL_SIZE_1M)
+    {
+        sizeGroupName = QObject::tr("Big (1M - 500K)"); // "大(500K - 1M)"
+    }
+    else if (messageSize >= MAIL_SIZE_1M && messageSize <= MAIL_SIZE_5M)
+    {
+        sizeGroupName = QObject::tr("Great (5M - 1M)"); //很大(1M - 5M)
+    }
+    else if (messageSize > MAIL_SIZE_5M)
+    {
+        sizeGroupName = QObject::tr("Huge (>5M)");//巨大(>5M)
+    }
+    return sizeGroupName;
 }
 
-QString generationGroupName(/*int dayOfWeek, */uint64_t mailDate)
+QString QMailTreeModel::generationGroupName(const MailHeaderInfo & stMailHeaderInfo)
 {
     QString groupName;
-    groupName = QObject::tr("early");
-    //今天
-    QDate now = QDate::currentDate();
-    QDateTime todayStartDate(QDate(now.year(), now.month(), now.day()), QTime(0, 0, 0, 1));
-    QDateTime todayEndDate(QDate(now.year(), now.month(), now.day()), QTime(23, 59, 59, 998));
-    uint64_t todayStartTime = todayStartDate.toTime_t();
-    uint64_t todayEndTime = todayEndDate.toTime_t();
-    // 昨天
-    QDate yesterday = now;
-    yesterday = yesterday.addDays(-1);
-    QDateTime yesterdayStartDate(QDate(yesterday.year(), yesterday.month(), yesterday.day()), QTime(0, 0, 0, 1));
-    QDateTime yesterdayEndDate(QDate(yesterday.year(), yesterday.month(), yesterday.day()), QTime(23, 59, 59, 998));
-    uint64_t yesterdayStartTime = yesterdayStartDate.toTime_t();
-    uint64_t yesterdayEndTime = yesterdayEndDate.toTime_t();
-
-    if (mailDate <= todayEndTime && mailDate >= todayStartTime)
+    switch (m_queryConditions.curSortColumn)
     {
-        groupName = QObject::tr("today");
-    }
-    else if (mailDate <= yesterdayEndTime && mailDate >= yesterdayStartTime)
+    case MLMC_Date:
     {
-        groupName = QObject::tr("yesterday");
+        groupName = QObject::tr("early");
+        //今天
+        QDate now = QDate::currentDate();
+        QDateTime todayStartDate(QDate(now.year(), now.month(), now.day()), QTime(0, 0, 0, 1));
+        QDateTime todayEndDate(QDate(now.year(), now.month(), now.day()), QTime(23, 59, 59, 998));
+        uint64_t todayStartTime = todayStartDate.toTime_t();
+        uint64_t todayEndTime = todayEndDate.toTime_t();
+        // 昨天
+        QDate yesterday = now;
+        yesterday = yesterday.addDays(-1);
+        QDateTime yesterdayStartDate(QDate(yesterday.year(), yesterday.month(), yesterday.day()), QTime(0, 0, 0, 1));
+        QDateTime yesterdayEndDate(QDate(yesterday.year(), yesterday.month(), yesterday.day()), QTime(23, 59, 59, 998));
+        uint64_t yesterdayStartTime = yesterdayStartDate.toTime_t();
+        uint64_t yesterdayEndTime = yesterdayEndDate.toTime_t();
+        uint64_t messageDate = stMailHeaderInfo.date;//CMemoryDBManager::instance()->getTime(stMailListItemData);
+        if (messageDate <= todayEndTime && messageDate >= todayStartTime)
+        {
+            groupName = QObject::tr("today");
+        }
+        else if (messageDate <= yesterdayEndTime && messageDate >= yesterdayStartTime)
+        {
+            groupName = QObject::tr("yesterday");
+        }
+        break;
     }
+    case MLMC_Size:
+    {
+        uint32_t messageSize = stMailHeaderInfo.messageSize;//CMemoryDBManager::instance()->getSize(stMailListItemData);
+        groupName = querySizeGroupName(messageSize);
+        break;
+    }
+    
+    default:
+        break;
+    }
+    
     return groupName;
 }
 
-void QMailTreeModel::loadData(int mailListDisplayMode)
+QueryConditions QMailTreeModel::getQueryCondition()
 {
-    
-#pragma region 初始化模型数据
+    return m_queryConditions;
+}
+
+void QMailTreeModel::queryData(const QueryConditions& queryInfo)
+{
+    m_queryConditions = queryInfo;
+    stepQueryData();
+}
+
+void QMailTreeModel::queryData()
+{
+    stepQueryData();
+}
+
+bool QMailTreeModel::stepQueryData()
+{
+    queryInMemoryResultSet();
+    generateQueryResultSet();
+    regenerateMailListModelData();
+    return true;
+}
+
+void QMailTreeModel::generateQueryResultSet()
+{
+    QTime timeConsuming;
+    timeConsuming.start();
+    if (m_queryConditions.needAsynQuery)
+    {
+        m_setQueryResult = m_setQueryResult_Memory.intersect(m_setQueryResult_DB);
+    }
+    else
+    {
+        m_setQueryResult.swap(m_setQueryResult_Memory);
+    }
+    if (MLDM_CONVERSATION == m_queryConditions.mailListDisplayMode)
+    {
+        QSet<QuerySummaryInfo>::const_iterator iter = m_setQueryResult.constBegin();
+        while (iter != m_setQueryResult.constEnd())
+        {
+            m_setQueryResult_Conversation.insert((*iter).conversationId);
+            ++iter;
+        }
+    }
+    else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
+    {
+
+    }
+    QString consumingTime = " generateQueryResultSet consume:" + QString::number(timeConsuming.elapsed());
+    qDebug() << consumingTime;
+}
+
+
+void QMailTreeModel::regenerateMailListModelData()
+{
+    QTime timeConsuming;
+    timeConsuming.start();
+    clear();
     initRootItem();
-    m_mailListDisplayMode = mailListDisplayMode;
+    QString consumingTime = " regenerateMailListModelData  1. consume:" + QString::number(timeConsuming.elapsed());
+    qDebug() << consumingTime;
     MailListItemData stMailListItemData;
-    MailHeaderInfo stMailHeaderInfo;
-    if (m_mailListDisplayMode == MLDM_CONVERSATION)
+    if (MLDM_CONVERSATION == m_queryConditions.mailListDisplayMode)
     {
         //1. 生成一级分组信息
-        int groupId = 1;
+        CMemoryDBManager::instance()->clearGroup();
+        MailHeaderInfo stMailHeaderInfo;
         MailConversationInfo stMailConversationInfo;
-        for (int i = 0; i < CMemoryDBManager::instance()->m_listMemMailConversations.size(); i++)
+        QSet<uint32_t>::const_iterator iter = m_setQueryResult_Conversation.constBegin();
+        while (iter != m_setQueryResult_Conversation.constEnd())
         {
-            stMailConversationInfo = CMemoryDBManager::instance()->m_listMemMailConversations.at(i);
+            stMailConversationInfo = CMemoryDBManager::instance()->getConversationHeader(*iter);
+            MailGroupInfo stMailGroupInfo;
+            stMailGroupInfo.name = generationGroupName(stMailConversationInfo);
+            stMailGroupInfo = CMemoryDBManager::instance()->addGroup(stMailGroupInfo);
             stMailListItemData.itemType = MLIT_GROUP;
-            stMailListItemData.id = groupId++;
-            stMailListItemData.messageDate = stMailConversationInfo.date;
-            stMailListItemData.name = generationGroupName(stMailListItemData.messageDate);        
-            stMailListItemData.messageSize = stMailConversationInfo.messageSize;
+            stMailListItemData.id = stMailGroupInfo.id;
+            //stMailListItemData.messageDate = stMailConversationInfo.date;
+            //stMailListItemData.messageSize = stMailConversationInfo.messageSize;
+            //stMailListItemData.name = generationGroupName(stMailListItemData);
             m_rootItem->insertChildren(m_rootItem->childCount(), stMailListItemData);
+            ++iter;
         }
-
+        consumingTime = " regenerateMailListModelData  2 consume:" + QString::number(timeConsuming.elapsed());
+        qDebug() << consumingTime;
         //2. 生成会话信息 和 其它下邮件信息
-        for (int i = 0; i < CMemoryDBManager::instance()->m_listMemMailConversations.size(); i++)
+        uint64_t mailId = DEFAULT_VALUE_ZERO;
+        MailListItemData stParentMailListItemData;
+        QSet<uint32_t>::const_iterator iter2 = m_setQueryResult_Conversation.constBegin();
+        while (iter2 != m_setQueryResult_Conversation.constEnd())
         {
-            stMailConversationInfo = CMemoryDBManager::instance()->m_listMemMailConversations.at(i);
-            QString groupName = generationGroupName(stMailConversationInfo.date);
+            stMailConversationInfo = CMemoryDBManager::instance()->getConversationHeader(*iter2);
             stMailListItemData.itemType = MLIT_CONVERSATION;
-            stMailListItemData.messageDate = stMailConversationInfo.date;
-            stMailListItemData.name = stMailConversationInfo.Subject;
-            stMailListItemData.id = stMailConversationInfo.Id;
-            stMailListItemData.messageSize = stMailConversationInfo.messageSize;
-            MailTreeItem *parent = getParentItem(groupName);
+            //stMailListItemData.messageDate = stMailConversationInfo.date;
+            //stMailListItemData.name = stMailConversationInfo.Subject;
+            stMailListItemData.id = stMailConversationInfo.id;
+            //stMailListItemData.messageSize = stMailConversationInfo.messageSize;
+            QString groupName = generationGroupName(stMailConversationInfo);
+            MailGroupInfo stMailGroupInfo = CMemoryDBManager::instance()->getGroupHeader(groupName);
+            stParentMailListItemData.id = stMailGroupInfo.id;
+            stParentMailListItemData.itemType = MLIT_GROUP;
+            MailTreeItem *parent = getParentItem(stParentMailListItemData);
             if (parent)
             {
                 MailTreeItem * converItem = parent->insertChildren(parent->childCount(), stMailListItemData);
                 if (converItem) //在会话下添加所有邮件
                 {
-                    for (int i = 0; i < stMailConversationInfo.listConversationMailIds.size(); i++)
-                    {
-                        stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader(stMailConversationInfo.listConversationMailIds.at(i));
-                        stMailListItemData.itemType = MLIT_MAIL;
-                        stMailListItemData.messageDate = stMailHeaderInfo.date;
-                        stMailListItemData.name = stMailHeaderInfo.Subject;
-                        stMailListItemData.id = stMailHeaderInfo.Id;
-                        stMailListItemData.messageSize = stMailHeaderInfo.messageSize;
-                        stMailListItemData.folderId = stMailHeaderInfo.folderId;
-                        converItem->insertChildren(converItem->childCount(), stMailListItemData);
+                    QSet<uint64_t>::const_iterator iter3 = stMailConversationInfo.conversationMailIds.constBegin();
+                    while (iter3 != stMailConversationInfo.conversationMailIds.constEnd()) {
+                        mailId = *iter3;
+                        if (converMailLegal(mailId))
+                        {
+                            stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader(mailId);
+                            stMailListItemData.itemType = MLIT_MAIL;
+                            //stMailListItemData.messageDate = stMailHeaderInfo.date;
+                            //stMailListItemData.name = stMailHeaderInfo.Subject;
+                            stMailListItemData.id = stMailHeaderInfo.id;
+                            //stMailListItemData.messageSize = stMailHeaderInfo.messageSize;
+                            //stMailListItemData.folderId = stMailHeaderInfo.folderId;
+                            converItem->insertChildren(converItem->childCount(), stMailListItemData);
+                        }
+                        ++iter3;
                     }
-                    
                 }
+            }
+            ++iter2;
+        }
+    }
+    else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
+    {
+        MailHeaderInfo stMailHeaderInfo;
+        QSet<QuerySummaryInfo>::const_iterator iter = m_setQueryResult.constBegin();
+        while (iter != m_setQueryResult.constEnd())
+        {
+            stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader((*iter).id);
+            stMailListItemData.itemType = MLIT_MAIL;
+            stMailListItemData.id = stMailHeaderInfo.id;
+            //stMailListItemData.messageDate = stMailHeaderInfo.date;
+            //stMailListItemData.messageSize = stMailHeaderInfo.messageSize;
+            //stMailListItemData.name = stMailHeaderInfo.Subject;
+            m_rootItem->insertChildren(m_rootItem->childCount(), stMailListItemData);
+            ++iter;
+        }
+        consumingTime = " regenerateMailListModelData  2 consume:" + QString::number(timeConsuming.elapsed());
+        qDebug() << consumingTime;
+    }
+    
+    consumingTime = " regenerateMailListModelData  3 consume:" + QString::number(timeConsuming.elapsed());
+    qDebug() << consumingTime;
+    updateProxyModelData();
+    consumingTime = " regenerateMailListModelData consume:" + QString::number(timeConsuming.elapsed());
+    qDebug() << consumingTime;
+}
+
+bool QMailTreeModel::converMailLegal(uint64_t mailId)
+{
+    bool legal = false;
+    QSet<QuerySummaryInfo>::const_iterator iter = m_setQueryResult.constBegin();
+    while (iter != m_setQueryResult.constEnd())
+    {
+        if (mailId == (*iter).id)
+        {
+            legal = true;
+            break;
+        }
+        ++iter;
+    }
+    return legal;
+}
+
+void QMailTreeModel::updateProxyModelData()
+{
+    QMailSortFilterProxyModel::instance()->setSourceModel(this);
+    int sortColumn = QMailSortFilterProxyModel::instance()->sortColumn();
+    Qt::SortOrder order = QMailSortFilterProxyModel::instance()->sortOrder();
+    int xx;
+    xx++;
+    //QMailSortFilterProxyModel::instance()->invalidProxyModel(m_queryConditions);
+}
+
+void QMailTreeModel::queryInMemoryResultSet()
+{
+    QTime timeConsuming;
+    timeConsuming.start();
+    QMutexLocker locker(&m_queryResultSetMutex);
+    m_setQueryResult.clear();
+    m_setQueryResult_Memory.clear();
+    m_setQueryResult_DB.clear();
+    m_setQueryResult_Conversation.clear();
+    QMapIterator<uint32_t, MemoryMailData> iter(CMemoryDBManager::instance()->m_mapMailMemoryData);
+    while (iter.hasNext()) {
+        iter.next();
+        for (int i = 0; i < iter.value().vecMailHeaderDatas.size(); ++i)
+        {
+            if (whetherNeedToDisplay(iter.value().vecMailHeaderDatas.at(i)))
+            {
+                addToQuerySet(iter.value().vecMailHeaderDatas.at(i));
             }
         }
     }
-#pragma endregion 初始化模型数据
+    QString consumingTime = " queryInMemoryResultSet consume:" + QString::number(timeConsuming.elapsed());
+    qDebug() << consumingTime;
 }
 
-MailTreeItem * QMailTreeModel::getParentItem(const QString & groupName)
+
+bool QMailTreeModel::whetherNeedToDisplay(const MailHeaderInfo & stMailHeaderInfo)
+{
+    uint32_t queryFlags = QMF_NONE;
+    uint32_t passQueryFlags = QMF_NONE;
+    //查询邮件夹过滤
+    uint32_t folderId = m_queryConditions.folderId;
+    if (folderId != DEFAULT_VALUE_ZERO)
+    {
+        queryFlags |= QMF_FOLDER;
+        if (folderId == stMailHeaderInfo.folderId)
+        {
+            passQueryFlags |= QMF_FOLDER;
+        }
+    }
+    //标题过滤
+    QString subject = m_queryConditions.subject;
+    if (!subject.isEmpty())
+    {
+        queryFlags |= QMF_SUBJECT;
+        if (stMailHeaderInfo.Subject.contains(subject))
+        {
+            passQueryFlags |= QMF_SUBJECT;
+        }
+    }
+    //发件人过滤
+    if (m_queryConditions.authors.size() > 0)
+    {
+        queryFlags |= QMF_AUTHOR;
+        if (m_queryConditions.authors.contains(stMailHeaderInfo.author.toULongLong()))
+        {
+            passQueryFlags |= QMF_AUTHOR;
+        }
+    }
+    //收件人过滤
+    if (m_queryConditions.recipients.size() > 0)
+    {
+        queryFlags |= QMF_RECIPIENTS;
+        uint64_t contactId = DEFAULT_VALUE_ZERO;
+        QStringList recsList = stMailHeaderInfo.recipients.split(",");
+        for (int i = 0; i < recsList.size(); i++)
+        {
+            contactId = recsList.at(i).toULongLong();
+            if (m_queryConditions.recipients.contains(contactId))
+            {
+                passQueryFlags |= QMF_RECIPIENTS;
+                break;
+            }
+        }
+    }
+    //附件过滤
+    if (m_queryConditions.attachmentOption != QOA_UNLIMITED)
+    {
+        queryFlags |= QMF_ATTACHMENT;
+        if (m_queryConditions.attachmentOption == QOA_EXIST && (stMailHeaderInfo.flags & MF_Attachment) == MF_Attachment)
+        {
+            passQueryFlags |= QMF_ATTACHMENT;
+        }
+        else if (m_queryConditions.attachmentOption == QOA_WITHOUT && (stMailHeaderInfo.flags & MF_Attachment) != MF_Attachment)
+        {
+            passQueryFlags |= QMF_ATTACHMENT;
+        }
+    }
+    //时间过滤
+    if (m_queryConditions.timeOption != QOT_UNLIMITED)
+    {
+        queryFlags |= QMF_TIME;
+        if (stMailHeaderInfo.date >= m_queryConditions.startTime && stMailHeaderInfo.date <= m_queryConditions.endTime)
+        {
+            passQueryFlags |= QMF_TIME;
+        }
+    }
+    //
+    if (passQueryFlags == queryFlags/* && queryFlags != QMF_NONE*/)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+void QMailTreeModel::addToQuerySet(const MailHeaderInfo & stMailHeaderInfo)
+{
+    QuerySummaryInfo stQuerySummaryInfo;
+    stQuerySummaryInfo.id = stMailHeaderInfo.id;
+    stQuerySummaryInfo.conversationId = stMailHeaderInfo.conversationId;
+    ///stQuerySummaryInfo.date = stMailHeaderInfo.date;
+    //stQuerySummaryInfo.messageSize = stMailHeaderInfo.messageSize;
+    m_setQueryResult_Memory.insert(stQuerySummaryInfo);
+}
+
+MailTreeItem * QMailTreeModel::getParentItem(const MailListItemData & stMailListItemData)
 {
     for (int i = 0; i < m_rootItem->childCount(); i++)
     {
-        if (m_rootItem->child(i)->stItemData.name == groupName)
+        if (m_rootItem->child(i)->stItemData.id == stMailListItemData.id && m_rootItem->child(i)->stItemData.itemType == stMailListItemData.itemType)
         {
             return m_rootItem->child(i);
         }
@@ -403,19 +669,19 @@ QModelIndex QMailTreeModel::index(int row, int column, const QModelIndex &parent
 //    return success;
 //}
 
-//bool TreeMailModel::insertRows(int position, int rows, const QModelIndex &parent)
-//{
-//    TreeMailItem *parentItem = getItem(parent);
-//    bool success;
-//
-//    beginInsertRows(parent, position, position + rows - 1);
-//    success = parentItem->insertChildren(position, rows, m_rootItem->columnCount());
-//    endInsertRows();
-//
-//    return success;
-//}
+bool QMailTreeModel::insertRows(int position, int rows, const QModelIndex &parent)
+{
+    MailTreeItem *parentItem = getItem(parent);
+    bool success;
 
-//! [7]
+    beginInsertRows(parent, position, position + rows - 1);
+    MailListItemData stMailListItemData;
+    success = parentItem->insertChildren(position, stMailListItemData);
+    endInsertRows();
+
+    return success;
+}
+
 QModelIndex QMailTreeModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -447,6 +713,10 @@ QModelIndex QMailTreeModel::parent(const QModelIndex &index) const
 
 bool QMailTreeModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
+    if (rows <= 0)
+    {
+        return false;
+    }
     MailTreeItem *parentItem = getItem(parent);
     bool success = true;
     beginRemoveRows(parent, position, position + rows - 1);
@@ -471,7 +741,18 @@ int QMailTreeModel::rowCount(const QModelIndex &parent) const
     }
     return parentItem->childCount();
 }
-//! [8]
+
+bool QMailTreeModel::setData(const QModelIndex &index, const MailListItemData &stMailListItemData)
+{
+
+    MailTreeItem *item = getItem(index);
+    bool result = item->setData(stMailListItemData);
+
+    if (result)
+        emit dataChanged(index, index);
+
+    return result;
+}
 
 //bool TreeMailModel::setData(const QModelIndex &index, const QVariant &value, int role)
 //{
