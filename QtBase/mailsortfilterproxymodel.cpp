@@ -23,7 +23,7 @@ bool QMailSortFilterProxyModel::filterAcceptsRow(int sourceRow,
 {
     QModelIndex indexItemType = sourceModel()->index(sourceRow, MLMC_ItemType, sourceParent);
     QModelIndex indexFolderId = sourceModel()->index(sourceRow, MLMC_Folder, sourceParent);
-    int itemType = sourceModel()->data(indexItemType).toInt();    
+    int itemType = sourceModel()->data(indexItemType).toInt();
     if (!m_queryConditions.query)
     {
         return true;

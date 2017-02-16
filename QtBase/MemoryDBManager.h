@@ -35,8 +35,7 @@ public:
     void init();
 
 private:
-    //QList<MailHeaderInfo> m_listMemMailHeaders;
-    QMap<uint32_t, MemoryMailData> m_mapMailMemoryData;
+    QMap<uint64_t, MailHeaderInfo> m_mapMailMemoryData;
     QMutex  m_mailMutex;
 
     QMap<uint32_t, MailConversationInfo> m_mapMailConversationData;

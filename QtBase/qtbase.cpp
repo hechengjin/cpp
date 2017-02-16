@@ -390,13 +390,25 @@ void QtBase::on_refreshPushButton_clicked()
 
 void QtBase::on_queryPushButton_clicked()
 {
+    int displayMode = MLDM_CONVERSATION;//MLDM_CONVERSATION; MLDM_MAIL
+    if (displayMode == MLDM_MAIL)
+    {
+        ui.mailListTreeView->setColumnHidden(MLMC_Fold, true);
+    }
+    else
+    {
+        ui.mailListTreeView->setColumnHidden(MLMC_Fold, false);
+    }
+    int sortColumn = MLMC_Date;
+    ui.mailListTreeView->setDisplayMode(displayMode);
     QueryConditions stQueryConditions;
-    stQueryConditions.mailListDisplayMode = MLDM_MAIL;//MLDM_CONVERSATION; MLDM_MAIL
-    stQueryConditions.curSortColumn = MLMC_Date;
+    stQueryConditions.mailListDisplayMode = displayMode;
+    stQueryConditions.curSortColumn = sortColumn;
     stQueryConditions.folderId = ui.folderIdQueryLineEdit->text().toUInt();
     stQueryConditions.query = true;
     //QMailSortFilterProxyModel::instance()->setQueryCondition(stQueryConditions);
     QMailTreeModel::instance()->queryData(stQueryConditions);
+    ui.mailListTreeView->sortByColumn(sortColumn, Qt::DescendingOrder);
     onRefreshAccountMails();
     for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
         ui.mailListTreeView->resizeColumnToContents(column);

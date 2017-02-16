@@ -12,12 +12,18 @@
 QMailTreeViewHeader::QMailTreeViewHeader(QWidget *parent)
 : QHeaderView(Qt::Horizontal, parent)
 , m_preSortColumn(MLMC_Date)
+, m_mailListDisplayMode(MLDM_MAIL)
 {
 }
 
 QMailTreeViewHeader::~QMailTreeViewHeader()
 {
 
+}
+
+void QMailTreeViewHeader::setDisplayMode(int displayMode)
+{
+    m_mailListDisplayMode = displayMode;
 }
 
 void QMailTreeViewHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
@@ -30,13 +36,12 @@ void QMailTreeViewHeader::mousePressEvent(QMouseEvent *event)
     int x = event->pos().x();
     //int y = event->pos().y();
     int column = visualIndexAt(x);
-    if (m_preSortColumn != column)
+    if (m_preSortColumn != column && m_mailListDisplayMode != MLDM_MAIL)
     {
         QMailTreeModel::instance()->clear();
         QueryConditions stQueryConditions = QMailTreeModel::instance()->getQueryCondition();
         stQueryConditions.curSortColumn = column;
         QMailTreeModel::instance()->queryData(stQueryConditions);
-
         //QMailTreeModel::instance()->setSort(column, Qt::DescendingOrder);
         switch (column) {
         case MLMC_Date:

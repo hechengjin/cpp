@@ -3,6 +3,7 @@
 
 #include <QTreeView>
 #include "dataDefine.h"
+class QMailTreeViewHeader;
 
 class QMailTreeView : public QTreeView
 {
@@ -11,6 +12,9 @@ class QMailTreeView : public QTreeView
 public:
     QMailTreeView(QWidget *parent);
     ~QMailTreeView();
+
+public:
+    void setDisplayMode(int displayMode);
 protected:
     void init();
     void signalSlotConnection();
@@ -24,7 +28,7 @@ protected slots:
     void slotClicked(const QModelIndex &index);
     void onRefreshAccountMails();
 private:
-    
+    QMailTreeViewHeader * m_pMailTreeViewHeader;
 };
 
 #endif // QMAILTREEVIEW_H

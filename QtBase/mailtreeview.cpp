@@ -12,6 +12,7 @@ class MailTreeItem;
 
 QMailTreeView::QMailTreeView(QWidget *parent)
     : QTreeView(parent)
+    , m_pMailTreeViewHeader(NULL)
 {
     qRegisterMetaType<MailListSelectItemData>("MailListSelectItemData");
     qRegisterMetaType<MailListSelectData>("MailListSelectData");
@@ -31,9 +32,9 @@ void QMailTreeView::init()
     setModel(QMailSortFilterProxyModel::instance());
     setSortingEnabled(true);
     sortByColumn(MLMC_Date, Qt::DescendingOrder);
-    QMailTreeViewHeader * pMailTreeViewHeader = new QMailTreeViewHeader(this);
-    setHeader(pMailTreeViewHeader);
-    connect(pMailTreeViewHeader, SIGNAL(refreshAccountsMailList()), this, SLOT(onRefreshAccountMails()));
+    m_pMailTreeViewHeader = new QMailTreeViewHeader(this);
+    setHeader(m_pMailTreeViewHeader);
+    connect(m_pMailTreeViewHeader, SIGNAL(refreshAccountsMailList()), this, SLOT(onRefreshAccountMails()));
     
     setItemDelegate(new QMailItemDelegate(this));
     for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
@@ -147,5 +148,13 @@ void QMailTreeView::slotDeleteMailClicked()
     {
         QMailTreeModel::instance()->resetModel();
         expandAll();
+    }
+}
+
+void QMailTreeView::setDisplayMode(int displayMode)
+{
+    if (m_pMailTreeViewHeader)
+    {
+        m_pMailTreeViewHeader->setDisplayMode(displayMode);
     }
 }

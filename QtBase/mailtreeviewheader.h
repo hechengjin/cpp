@@ -10,6 +10,7 @@ public:
     QMailTreeViewHeader(QWidget *parent);
     ~QMailTreeViewHeader();
 
+    void setDisplayMode(int displayMode);
     //static QMailTreeViewHeader* instance();
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -19,6 +20,7 @@ signals :
     void refreshAccountsMailList();
 private:
     int m_preSortColumn;
+    int m_mailListDisplayMode;
 };
 
 #endif // MAILTREEVIEWHEADER_H

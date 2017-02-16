@@ -33,7 +33,6 @@ void CMemoryDBManager::init()
     //前天
     QDate beforeyesterday = yesterday;
     beforeyesterday = beforeyesterday.addDays(-1);
-    MemoryMailData stMemoryMailData;
     for (int i = 0; i < 10; i++) //初始化邮件数据
     {
         MailHeaderInfo stMailHeaderInfo;
@@ -97,14 +96,13 @@ void CMemoryDBManager::init()
         //stMailHeaderInfo.referenceInfo = stFetchMessagesParam.references.join(",");
         stMailHeaderInfo.flags = DEFAULT_VALUE_ZERO;
         //stMailHeaderInfo.keyLocal = getKeyLocal(stMailHeaderInfo);
-        stMemoryMailData.vecMailHeaderDatas.push_back(stMailHeaderInfo);
+        m_mapMailMemoryData.insert(stMailHeaderInfo.id, stMailHeaderInfo);
     }
-    m_mapMailMemoryData[inboxFolderId] = stMemoryMailData;
 #pragma endregion 初始化邮件
 
 #pragma region 初始化会话数据
     MailConversationInfo stMailConversationInfo;
-    stMailConversationInfo = m_mapMailMemoryData[inboxFolderId].vecMailHeaderDatas.at(1);
+    stMailConversationInfo = m_mapMailMemoryData[1];
     stMailConversationInfo.id = 1;
     stMailConversationInfo.Subject = "Conversation Subject: 1";
     int hour = qrand() % 22 + 1;
@@ -129,20 +127,18 @@ void CMemoryDBManager::init()
     //}
     addConversation(stMailConversationInfo);
 
-    QMapIterator<uint32_t, MemoryMailData> iter(m_mapMailMemoryData);
+    QMapIterator<uint64_t, MailHeaderInfo> iter(m_mapMailMemoryData);
     int index = 0;
     while (iter.hasNext())
     {
         iter.next();
-        for (int i = 0; i < iter.value().vecMailHeaderDatas.size(); ++i) {
-            if (iter.value().vecMailHeaderDatas.at(i).conversationId == 1)
-            {
-                m_mapMailConversationData[1].conversationMailIds.insert(iter.value().vecMailHeaderDatas.at(i).id);
-            }
-            else
-            {
-                m_mapMailConversationData[2].conversationMailIds.insert(iter.value().vecMailHeaderDatas.at(i).id);
-            }
+        if (iter.value().conversationId == 1)
+        {
+            m_mapMailConversationData[1].conversationMailIds.insert(iter.value().id);
+        }
+        else
+        {
+            m_mapMailConversationData[2].conversationMailIds.insert(iter.value().id);
         }
         index++;
     }
@@ -156,19 +152,8 @@ void CMemoryDBManager::init()
 MailHeaderInfo CMemoryDBManager::getMailHeader(uint64_t mailId)
 {
     QMutexLocker locker(&m_mailMutex);
-    QMapIterator<uint32_t, MemoryMailData> iter(m_mapMailMemoryData);
-    int index = 0;
-    while (iter.hasNext())
-    {
-        iter.next();
-        for (int i = 0; i < iter.value().vecMailHeaderDatas.size(); ++i) {
-            if (iter.value().vecMailHeaderDatas.at(i).id == mailId)
-            {
-                return iter.value().vecMailHeaderDatas.at(i);
-            }
-        }
-        index++;
-    }
+    if(m_mapMailMemoryData.contains(mailId))
+        return m_mapMailMemoryData[mailId];
     MailHeaderInfo stMailHeaderInfo;
     return stMailHeaderInfo;
 }
@@ -238,13 +223,14 @@ MailConversationInfo CMemoryDBManager::getConversationHeader(uint32_t converId)
 
 bool CMemoryDBManager::deleteMailRecord(uint64_t mailId, uint32_t folderId)
 {
-    QMutexLocker locker(&m_mailMutex); //外面加个括号防止重新生成时死锁
-    for (int i = 0; i < m_mapMailMemoryData[folderId].vecMailHeaderDatas.size(); ++i)
-    {
-        if (m_mapMailMemoryData[folderId].vecMailHeaderDatas.at(i).id == mailId)
-        {
-            m_mapMailMemoryData[folderId].vecMailHeaderDatas.erase(m_mapMailMemoryData[folderId].vecMailHeaderDatas.begin() + i);
+    QMutexLocker locker(&m_mailMutex);
+    for (auto it = m_mapMailMemoryData.begin(); it != m_mapMailMemoryData.end(); /* don't increment here */) {
+        if (it.value().id == mailId) {
+            it = m_mapMailMemoryData.erase(it);
             break;
+        }
+        else {
+            ++it;
         }
     }
     return true;
@@ -253,7 +239,7 @@ bool CMemoryDBManager::deleteMailRecord(uint64_t mailId, uint32_t folderId)
 bool CMemoryDBManager::addMailRecord(MailHeaderInfo&  stMailInfo)
 {
     QMutexLocker locker(&m_mailMutex);
-    m_mapMailMemoryData[stMailInfo.folderId].vecMailHeaderDatas.push_back(stMailInfo);
+    m_mapMailMemoryData.insert(stMailInfo.id, stMailInfo);
     addConversationMail(stMailInfo.conversationId, stMailInfo.id);
     return true;
 }

@@ -361,6 +361,8 @@ void QMailTreeModel::regenerateMailListModelData()
             }
             ++iter2;
         }
+        consumingTime = " regenerateMailListModelData  3 consume:" + QString::number(timeConsuming.elapsed());
+        qDebug() << consumingTime;
     }
     else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
     {
@@ -368,9 +370,9 @@ void QMailTreeModel::regenerateMailListModelData()
         QSet<QuerySummaryInfo>::const_iterator iter = m_setQueryResult.constBegin();
         while (iter != m_setQueryResult.constEnd())
         {
-            stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader((*iter).id);
+            //stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader((*iter).id);
             stMailListItemData.itemType = MLIT_MAIL;
-            stMailListItemData.id = stMailHeaderInfo.id;
+            stMailListItemData.id = (*iter).id;//stMailHeaderInfo.id;
             //stMailListItemData.messageDate = stMailHeaderInfo.date;
             //stMailListItemData.messageSize = stMailHeaderInfo.messageSize;
             //stMailListItemData.name = stMailHeaderInfo.Subject;
@@ -381,11 +383,24 @@ void QMailTreeModel::regenerateMailListModelData()
         qDebug() << consumingTime;
     }
     
-    consumingTime = " regenerateMailListModelData  3 consume:" + QString::number(timeConsuming.elapsed());
-    qDebug() << consumingTime;
+  
     updateProxyModelData();
     consumingTime = " regenerateMailListModelData consume:" + QString::number(timeConsuming.elapsed());
     qDebug() << consumingTime;
+}
+
+void QMailTreeModel::updateProxyModelData()
+{
+    QTime timeConsuming;
+    timeConsuming.start();
+    QMailSortFilterProxyModel::instance()->setSourceModel(this);
+    QString consumingTime = " updateProxyModelData consume:" + QString::number(timeConsuming.elapsed());
+    qDebug() << consumingTime;
+    //int sortColumn = QMailSortFilterProxyModel::instance()->sortColumn();
+    //Qt::SortOrder order = QMailSortFilterProxyModel::instance()->sortOrder();
+    //int xx;
+    //xx++;
+    //QMailSortFilterProxyModel::instance()->invalidProxyModel(m_queryConditions);
 }
 
 bool QMailTreeModel::converMailLegal(uint64_t mailId)
@@ -404,15 +419,7 @@ bool QMailTreeModel::converMailLegal(uint64_t mailId)
     return legal;
 }
 
-void QMailTreeModel::updateProxyModelData()
-{
-    QMailSortFilterProxyModel::instance()->setSourceModel(this);
-    int sortColumn = QMailSortFilterProxyModel::instance()->sortColumn();
-    Qt::SortOrder order = QMailSortFilterProxyModel::instance()->sortOrder();
-    int xx;
-    xx++;
-    //QMailSortFilterProxyModel::instance()->invalidProxyModel(m_queryConditions);
-}
+
 
 void QMailTreeModel::queryInMemoryResultSet()
 {
@@ -423,15 +430,12 @@ void QMailTreeModel::queryInMemoryResultSet()
     m_setQueryResult_Memory.clear();
     m_setQueryResult_DB.clear();
     m_setQueryResult_Conversation.clear();
-    QMapIterator<uint32_t, MemoryMailData> iter(CMemoryDBManager::instance()->m_mapMailMemoryData);
+    QMapIterator<uint64_t, MailHeaderInfo> iter(CMemoryDBManager::instance()->m_mapMailMemoryData);
     while (iter.hasNext()) {
         iter.next();
-        for (int i = 0; i < iter.value().vecMailHeaderDatas.size(); ++i)
+        if (whetherNeedToDisplay(iter.value()))
         {
-            if (whetherNeedToDisplay(iter.value().vecMailHeaderDatas.at(i)))
-            {
-                addToQuerySet(iter.value().vecMailHeaderDatas.at(i));
-            }
+            addToQuerySet(iter.value());
         }
     }
     QString consumingTime = " queryInMemoryResultSet consume:" + QString::number(timeConsuming.elapsed());

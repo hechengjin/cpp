@@ -198,19 +198,19 @@ enum MailFlag : uint32_t
 };
 
 
-struct MemoryMailData
-{
-    MemoryMailData()
-    {
-    }
-
-    //uint32_t latestTime; //动态算出来
-    //uint32_t oldestTime;  //不用
-    QString listPathName;
-    uint32_t numberOfMessagesOnServer;
-
-    QVector<MailHeaderInfo> vecMailHeaderDatas;
-};
+//struct MemoryMailData
+//{
+//    MemoryMailData()
+//    {
+//    }
+//
+//    //uint32_t latestTime; //动态算出来
+//    //uint32_t oldestTime;  //不用
+//    QString listPathName;
+//    uint32_t numberOfMessagesOnServer;
+//
+//    QVector<MailHeaderInfo> vecMailHeaderDatas;
+//};
 
 #pragma endregion 内存数据
 
