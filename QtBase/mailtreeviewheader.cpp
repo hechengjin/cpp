@@ -36,6 +36,10 @@ void QMailTreeViewHeader::mousePressEvent(QMouseEvent *event)
     int x = event->pos().x();
     //int y = event->pos().y();
     int column = visualIndexAt(x);
+    if (column == MLMC_Fold)  //禁止此列排序
+    {
+        return;
+    }
     if (m_preSortColumn != column && m_mailListDisplayMode != MLDM_MAIL)
     {
         QMailTreeModel::instance()->clear();

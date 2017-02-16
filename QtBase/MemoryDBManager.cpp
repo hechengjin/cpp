@@ -95,6 +95,10 @@ void CMemoryDBManager::init()
         //stMailHeaderInfo.bccList = tempAddress.join(",");
         //stMailHeaderInfo.referenceInfo = stFetchMessagesParam.references.join(",");
         stMailHeaderInfo.flags = DEFAULT_VALUE_ZERO;
+        if (i == 2)
+        {
+            stMailHeaderInfo.flags |= MF_Stick;
+        }
         //stMailHeaderInfo.keyLocal = getKeyLocal(stMailHeaderInfo);
         m_mapMailMemoryData.insert(stMailHeaderInfo.id, stMailHeaderInfo);
     }

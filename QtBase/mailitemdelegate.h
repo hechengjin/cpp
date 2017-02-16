@@ -17,9 +17,10 @@ public:
     void paint(QPainter *painter,
         const QStyleOptionViewItem &option,
         const QModelIndex &index) const Q_DECL_OVERRIDE;
+protected:
+    void paintGrid(QPainter *painter, const QRect &rect) const;
 
 private:
-    
 };
 
 #endif // MAILITEMDELEGATE_H

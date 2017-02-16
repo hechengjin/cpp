@@ -21,6 +21,7 @@ class QMailTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
     friend class QMailTreeView;
+    friend class QMailItemDelegate;
 public:
     QMailTreeModel(QObject *parent = 0);
     //TreeMailModel(const QStringList &headers, const QString &data,

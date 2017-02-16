@@ -194,7 +194,8 @@ enum MailFlag : uint32_t
     MF_Preview = 0x00008000,
     MF_DateOnly = 0x00010000,
     MF_Deleted = 0x00020000,
-    MF_HIDDEN = 0x00040000
+    MF_Hidden = 0x00040000,
+    MF_Stick = 0x00080000   //” º˛÷√∂•
 };
 
 
@@ -421,7 +422,7 @@ enum QueryMailFlag : uint32_t
     QMF_Preview = 0x00008000,
     QMF_DateOnly = 0x00010000,
     QMF_Deleted = 0x00020000,
-    QMF_HIDDEN = 0x00040000
+    QMF_Hidden = 0x00040000
 };
 
 #pragma endregion ≤È—Ø
