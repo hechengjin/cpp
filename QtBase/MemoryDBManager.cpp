@@ -105,7 +105,7 @@ void CMemoryDBManager::init()
 #pragma endregion 初始化邮件
 
 #pragma region 初始化会话数据
-    MailConversationInfo stMailConversationInfo;
+    MailConversationTable stMailConversationInfo;
     stMailConversationInfo = m_mapMailMemoryData[1];
     stMailConversationInfo.id = 1;
     stMailConversationInfo.Subject = "Conversation Subject: 1";
@@ -132,19 +132,17 @@ void CMemoryDBManager::init()
     addConversation(stMailConversationInfo);
 
     QMapIterator<uint64_t, MailHeaderInfo> iter(m_mapMailMemoryData);
-    int index = 0;
     while (iter.hasNext())
     {
         iter.next();
         if (iter.value().conversationId == 1)
         {
-            m_mapMailConversationData[1].conversationMailIds.insert(iter.value().id);
+            m_mapMailConversationData[1].mailIds.insert(iter.value().id);
         }
         else
         {
-            m_mapMailConversationData[2].conversationMailIds.insert(iter.value().id);
+            m_mapMailConversationData[2].mailIds.insert(iter.value().id);
         }
-        index++;
     }
 
 #pragma endregion 初始化会话数据
@@ -214,12 +212,12 @@ QString CMemoryDBManager::getSubject(const MailListItemData & stItemData)
     return "";
 }
 
-MailConversationInfo CMemoryDBManager::getConversationHeader(uint32_t converId)
+MailConversationTable CMemoryDBManager::getConversationHeader(uint32_t converId)
 {
     QMutexLocker locker(&m_converMutex);
     if(m_mapMailConversationData.contains(converId))
         return m_mapMailConversationData[converId];
-    MailConversationInfo stMailConversationInfo;
+    MailConversationTable stMailConversationInfo;
     return stMailConversationInfo;
     
 }
@@ -248,7 +246,7 @@ bool CMemoryDBManager::addMailRecord(MailHeaderInfo&  stMailInfo)
     return true;
 }
 
-bool CMemoryDBManager::addConversation(const MailConversationInfo & stMailConversationInfo)
+bool CMemoryDBManager::addConversation(const MailConversationTable & stMailConversationInfo)
 {
     QMutexLocker locker(&m_converMutex);
     m_mapMailConversationData[stMailConversationInfo.id] = stMailConversationInfo;
@@ -259,7 +257,7 @@ bool CMemoryDBManager::addConversation(const MailConversationInfo & stMailConver
 bool CMemoryDBManager::addConversationMail(uint32_t converId, uint64_t mailId)
 {
     QMutexLocker locker(&m_converMutex);
-    m_mapMailConversationData[converId].conversationMailIds.insert(mailId);
+    m_mapMailConversationData[converId].mailIds.insert(mailId);
     return true;
 }
 

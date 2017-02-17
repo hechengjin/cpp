@@ -31,6 +31,8 @@ private slots:
     void on_toReadTimePushButton_clicked();
     void on_toNumberTimePushButton_clicked();
     void on_bitPushButton_clicked();
+    void on_stringProcePushButton_clicked();
+    void on_regExpPushButton_clicked();
     void on_deleteMailPushButton_clicked();
     void on_refreshPushButton_clicked();
     void on_updateMailPushButton_clicked();

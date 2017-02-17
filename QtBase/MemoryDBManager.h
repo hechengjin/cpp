@@ -14,10 +14,10 @@ public:
 public:
 #pragma region 邮件列表
     MailHeaderInfo getMailHeader(uint64_t mailId);
-    MailConversationInfo getConversationHeader(uint32_t converId);
+    MailConversationTable getConversationHeader(uint32_t converId);
     bool deleteMailRecord(uint64_t mailId, uint32_t folderId = 1);
     bool addMailRecord(MailHeaderInfo&  stMailInfo);
-    bool addConversation(const MailConversationInfo & stMailConversationInfo);
+    bool addConversation(const MailConversationTable & stMailConversationInfo);
     bool addConversationMail(uint32_t converId, uint64_t mailId);
     uint32_t getFolderId(const MailListItemData & stItemData);
     uint32_t getSize(const MailListItemData & stItemData);
@@ -38,7 +38,7 @@ private:
     QMap<uint64_t, MailHeaderInfo> m_mapMailMemoryData;
     QMutex  m_mailMutex;
 
-    QMap<uint32_t, MailConversationInfo> m_mapMailConversationData;
+    QMap<uint32_t, MailConversationTable> m_mapMailConversationData;
     QMutex  m_converMutex;
 
     QMap<uint32_t, MailGroupInfo> m_mapMailGroupData;

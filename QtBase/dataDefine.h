@@ -123,14 +123,16 @@ struct MailHeaderInfo
     }
 };
 
-struct MailConversationInfo : MailHeaderInfo
+struct MailConversationTable : MailHeaderInfo
 {
-    MailConversationInfo()
+    MailConversationTable()
     :MailHeaderInfo() 
     {
     }
-    QSet<uint64_t> conversationMailIds;
-    MailConversationInfo& operator=(const MailHeaderInfo &rhs)
+    QSet<uint64_t> mailIds;
+    uint64_t newestMailId;
+    uint64_t oldestMailId;
+    MailConversationTable& operator=(const MailHeaderInfo &rhs)
     {
         id = rhs.id;
         serverId = rhs.serverId;

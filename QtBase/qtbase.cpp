@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <iomanip>
 #include <bitset>
+#include <QSet>
 #include "MemoryDBManager.h"
 #include "mailtreemodel.h"
 #include "mailtreeviewHeader.h"
@@ -91,6 +92,35 @@ void QtBase::on_charSetTestPushButton_clicked()
 #pragma endregion 字符集测试
 
 
+#pragma region 正则表达式
+void QtBase::on_regExpPushButton_clicked()
+{
+    //QString subject = QString::fromLocal8Bit("回复：转发： Re: Fw:主题回");
+    //QString converSubject = subject;
+    //converSubject.replace(QRegExp(QString::fromLocal8Bit("回复：|转发：|Re:| Fw:")), "");
+    //qDebug() << subject << "  " << converSubject;
+    //QString subject2 = "Re: Fw:subject";
+    //QString converSubject2 = subject2;
+    //converSubject2.replace(QRegExp(QString::fromLocal8Bit("回复：|转发：|Re:| Fw:")), "");
+    //qDebug() << subject2 << "  " << converSubject2;
+
+    //QString subject3 = "回复：Re: Fw:subject";
+    //QString converSubject3 = subject3;
+    //converSubject3.replace(QRegExp("回复：|转发：|Re:| Fw:"), "");
+    //qDebug() << subject3 << "  " << converSubject3;
+
+    QString subject_1 = QString::fromLocal8Bit("回复：转发： Re: Fw:主题回");
+    QString subject_2 = "回复：转发： Re: Fw:主题回";
+    subject_1.replace(QRegExp(QString::fromLocal8Bit("回复：|转发：|Re:| Fw:")), "");
+    subject_1.replace(QRegExp("回复：|转发：|Re:| Fw:"), "");
+
+    QString reg = QString::fromLocal8Bit("回复：|转发：|Re:| Fw:");
+    subject_2.replace(QRegExp(QString::fromLocal8Bit("回复：|转发：|Re:| Fw:")), "");
+    subject_2.replace(QRegExp(reg), "");
+    qDebug() << subject_1;
+    qDebug() << subject_2;
+}
+#pragma endregion 正则表达式
 
 
 #pragma region 时间测试
@@ -138,7 +168,7 @@ void QtBase::on_toNumberTimePushButton_clicked()
 
 #pragma endregion 时间测试
 
-#pragma region 操作测试
+#pragma region 位操作测试
 
 
 // shift-expression << additive-expression  要移位的数  << 左移几位
@@ -206,7 +236,7 @@ void QtBase::on_bitPushButton_clicked()
 
 }
 
-#pragma endregion 操作测试
+#pragma endregion 位操作测试
 
 #pragma region 容器测试
 
@@ -351,6 +381,25 @@ void QtBase::on_containerPushButton_clicked()
 
 #pragma endregion 容器测试
 
+#pragma region 字符串处理
+void QtBase::on_stringProcePushButton_clicked()
+{
+
+    QSet<uint64_t> setMailIds;
+    setMailIds.insert(2);
+    setMailIds.insert(3);
+    QStringList mailIds;
+    QSet<uint64_t>::const_iterator iter = setMailIds.constBegin();
+    while (iter != setMailIds.constEnd())
+    {
+        mailIds << QString::number(*iter);
+        ++iter;
+    }
+    //mailIds.removeOne("0");
+    QString strMailIds = mailIds.join(",");
+    qDebug() << strMailIds;
+}
+#pragma endregion 字符串处理
 
 #pragma region 邮件列表
 void QtBase::on_deleteMailPushButton_clicked()

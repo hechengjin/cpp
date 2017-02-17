@@ -154,6 +154,8 @@ void QMailTreeModel::resetModel()
 {
     beginResetModel();
     endResetModel();
+
+    //emit dataChanged(index, index);
 }
 
 
@@ -301,7 +303,7 @@ void QMailTreeModel::regenerateMailListModelData()
         //1. 生成一级分组信息
         CMemoryDBManager::instance()->clearGroup();
         MailHeaderInfo stMailHeaderInfo;
-        MailConversationInfo stMailConversationInfo;
+        MailConversationTable stMailConversationInfo;
         QSet<uint32_t>::const_iterator iter = m_setQueryResult_Conversation.constBegin();
         while (iter != m_setQueryResult_Conversation.constEnd())
         {
@@ -341,8 +343,8 @@ void QMailTreeModel::regenerateMailListModelData()
                 MailTreeItem * converItem = parent->insertChildren(parent->childCount(), stMailListItemData);
                 if (converItem) //在会话下添加所有邮件
                 {
-                    QSet<uint64_t>::const_iterator iter3 = stMailConversationInfo.conversationMailIds.constBegin();
-                    while (iter3 != stMailConversationInfo.conversationMailIds.constEnd()) {
+                    QSet<uint64_t>::const_iterator iter3 = stMailConversationInfo.mailIds.constBegin();
+                    while (iter3 != stMailConversationInfo.mailIds.constEnd()) {
                         mailId = *iter3;
                         if (converMailLegal(mailId))
                         {
