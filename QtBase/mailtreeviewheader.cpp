@@ -11,7 +11,7 @@
 
 QMailTreeViewHeader::QMailTreeViewHeader(QWidget *parent)
 : QHeaderView(Qt::Horizontal, parent)
-, m_preSortColumn(MLMC_Date)
+, m_preSortColumn(MLMCE_Date)
 , m_mailListDisplayMode(MLDM_MAIL)
 {
 }
@@ -36,7 +36,7 @@ void QMailTreeViewHeader::mousePressEvent(QMouseEvent *event)
     int x = event->pos().x();
     //int y = event->pos().y();
     int column = visualIndexAt(x);
-    if (column == MLMC_Fold)  //禁止此列排序
+    if (column == MLMCE_Fold)  //禁止此列排序
     {
         return;
     }
@@ -48,13 +48,13 @@ void QMailTreeViewHeader::mousePressEvent(QMouseEvent *event)
         QMailTreeModel::instance()->queryData(stQueryConditions);
         //QMailTreeModel::instance()->setSort(column, Qt::DescendingOrder);
         switch (column) {
-        case MLMC_Date:
+        case MLMCE_Date:
         {
             int xx;
             xx++;
             break;
         }
-        case MLMC_Size:
+        case MLMCE_Size:
         {
             int xx;
             xx++;

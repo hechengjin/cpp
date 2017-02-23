@@ -21,8 +21,8 @@ QMailSortFilterProxyModel::~QMailSortFilterProxyModel()
 bool QMailSortFilterProxyModel::filterAcceptsRow(int sourceRow,
     const QModelIndex &sourceParent) const
 {
-    QModelIndex indexItemType = sourceModel()->index(sourceRow, MLMC_ItemType, sourceParent);
-    QModelIndex indexFolderId = sourceModel()->index(sourceRow, MLMC_Folder, sourceParent);
+    QModelIndex indexItemType = sourceModel()->index(sourceRow, MLMCE_ItemType, sourceParent);
+    QModelIndex indexFolderId = sourceModel()->index(sourceRow, MLMCE_Folder, sourceParent);
     int itemType = sourceModel()->data(indexItemType).toInt();
     if (!m_queryConditions.query)
     {
@@ -57,7 +57,7 @@ bool QMailSortFilterProxyModel::lessThan(const QModelIndex &source_left, const Q
     //}
     switch (m_queryConditions.curSortColumn)
     {
-        case MLMC_Size:
+        case MLMCE_Size:
         {
             QVariant leftData = sourceModel()->data(source_left, UIROLE_ReadableSize);
             QVariant rightData = sourceModel()->data(source_right, UIROLE_ReadableSize);

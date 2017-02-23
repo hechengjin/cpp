@@ -105,30 +105,46 @@ QVariant MailTreeItem::data(int column, int role) const
         case Qt::DisplayRole:
         {
             switch (column) {
-                case MLMC_Id:
+                case MLMCE_Id:
                     rv = stItemData.id;
                     break;
 
-                case MLMC_ItemType:
+                case MLMCE_ItemType:
                     rv = stItemData.itemType;
                     break;
 
-                case MLMC_Subject:
+                case MLMCE_Subject:
                     rv = CMemoryDBManager::instance()->getSubject(stItemData);
                     break;
 
-                case MLMC_Date:
+                case MLMCE_Date:
                 {
+                    //QDateTime maillDateTime;
+                    //uint64_t messageDate = CMemoryDBManager::instance()->getTime(stItemData);
+                    //maillDateTime.setTime_t(messageDate);
+                    //rv = maillDateTime;
                     QDateTime maillDateTime;
-                    uint64_t messageDate = CMemoryDBManager::instance()->getTime(stItemData);
+                    uint64_t messageDate = 0;
+                    if (stItemData.itemType == MLIT_MAIL)
+                    {
+                        messageDate = CMemoryDBManager::instance()->getMailHeader(stItemData.id).date;
+                    }
+                    else if (MLDM_CONVERSATION)
+                    {
+                        messageDate = CMemoryDBManager::instance()->getConversationHeader(stItemData.id).date;
+                    }
+                    else if (MLIT_GROUP == stItemData.itemType)
+                    {
+                        rv = CMemoryDBManager::instance()->getGroupHeader(stItemData.id).name;
+                    }
                     maillDateTime.setTime_t(messageDate);
                     rv = maillDateTime;
                     break;
                 }
-                case MLMC_Size:
+                case MLMCE_Size:
                     rv = CMemoryDBManager::instance()->getSize(stItemData);
                     break;
-                case MLMC_Folder:
+                case MLMCE_Folder:
                     //rv = stItemData.folderId;
                     rv = CMemoryDBManager::instance()->getFolderId(stItemData);
                     break;
@@ -138,7 +154,7 @@ QVariant MailTreeItem::data(int column, int role) const
         }
         case UIROLE_ReadableSize:
         {
-            if (MLMC_Size == column)
+            if (MLMCE_Size == column)
             {
                 rv = CMemoryDBManager::instance()->getSize(stItemData);
             }

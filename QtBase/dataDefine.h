@@ -50,9 +50,9 @@ const int KB = 1024;
 /**
 *邮件头结构体 ----mail_header
 */
-struct MailHeaderInfo
+struct MailHeaderTable
 {
-    MailHeaderInfo()
+    MailHeaderTable()
     :id(DEFAULT_VALUE_ZERO) //64位的整数
     , serverId(DEFAULT_VALUE_ZERO)
     , folderId(DEFAULT_VALUE_ZERO)
@@ -97,7 +97,7 @@ struct MailHeaderInfo
         changeKey.clear();
     }
 
-    MailHeaderInfo& operator=(const MailHeaderInfo &rhs)
+    MailHeaderTable& operator=(const MailHeaderTable &rhs)
     {
         id = rhs.id;
         serverId = rhs.serverId;
@@ -123,16 +123,16 @@ struct MailHeaderInfo
     }
 };
 
-struct MailConversationTable : MailHeaderInfo
+struct MailConversationTable : MailHeaderTable
 {
     MailConversationTable()
-    :MailHeaderInfo() 
+    :MailHeaderTable() 
     {
     }
     QSet<uint64_t> mailIds;
     uint64_t newestMailId;
     uint64_t oldestMailId;
-    MailConversationTable& operator=(const MailHeaderInfo &rhs)
+    MailConversationTable& operator=(const MailHeaderTable &rhs)
     {
         id = rhs.id;
         serverId = rhs.serverId;
@@ -159,9 +159,9 @@ struct MailConversationTable : MailHeaderInfo
 };
 
 
-struct MailGroupInfo
+struct MailGroupVTable
 {
-    MailGroupInfo()
+    MailGroupVTable()
     {
     }
     uint32_t id;
@@ -223,27 +223,28 @@ enum MailFlag : uint32_t
 /**
 * 界面相关角色定义
 */
-enum UIRole
+
+enum UIRoleDefine
 {
     UIROLE_ReadableSize = Qt::UserRole,
     UIROLE_xx
 };
 
-enum MailListModelColumn {
+enum MailListModelColumnEx {
     //headers << tr("Id") << tr("ItemType") << tr("Priority") << tr("Attachment") << tr("From") << tr("To") << tr("Subject") << tr("Date") << tr("Size") << tr("Folder") << tr("Uid");
-    MLMC_Fold, //折叠占位
-    MLMC_Id,
-    MLMC_ItemType,
-    MLMC_Priority,
-    MLMC_Attachment,
-    MLMC_From,
-    MLMC_To,
-    MLMC_Subject,
-    MLMC_Date,
-    MLMC_Size,
-    MLMC_Folder,
-    MLMC_Uid,
-    MLMC_Count
+    MLMCE_Fold, //折叠占位
+    MLMCE_Id,
+    MLMCE_ItemType,
+    MLMCE_Priority,
+    MLMCE_Attachment,
+    MLMCE_From,
+    MLMCE_To,
+    MLMCE_Subject,
+    MLMCE_Date,
+    MLMCE_Size,
+    MLMCE_Folder,
+    MLMCE_Uid,
+    MLMCE_Count
 };
 
 enum MailListDisplayMode
@@ -353,9 +354,9 @@ struct QueryConditions
     , query(false)
     , attachmentOption(QOA_UNLIMITED)
     , timeOption(QOT_UNLIMITED)
-    , mailListDisplayMode(MLDM_CONVERSATION)
+    , displayMode(MLDM_CONVERSATION)
     , needAsynQuery(false)
-    , curSortColumn(MLMC_Date)
+    , curSortColumn(MLMCE_Date)
     {
     }
     uint32_t folderId;
@@ -368,7 +369,7 @@ struct QueryConditions
     int timeOption;
     uint64_t startTime;
     uint64_t endTime;
-    int mailListDisplayMode;
+    int displayMode;
     int curSortColumn;
     bool needAsynQuery;
     bool query;//是否通过点查询按钮获取的数据

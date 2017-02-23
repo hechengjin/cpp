@@ -87,7 +87,7 @@ bool QMailTreeModel::updateRecord(const MailListItemData & stItemData)
 
 bool QMailTreeModel::clearRecords()
 {
-    if (MLDM_CONVERSATION == m_queryConditions.mailListDisplayMode)
+    if (MLDM_CONVERSATION == m_queryConditions.displayMode)
     {
         for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
         {
@@ -107,11 +107,95 @@ bool QMailTreeModel::clearRecords()
             }
         }
     }
-    else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
+    else if (MLDM_MAIL == m_queryConditions.displayMode)
     {
         m_rootItem->removeAllItems();
     }
     return true;
+}
+
+QModelIndex QMailTreeModel::itemToIndex(const MailListItemData & stItemData)
+{
+
+    QModelIndex rootModelIndex = QModelIndex();
+    QModelIndex mailModelIndex;
+    for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
+    {
+        MailTreeItem *groupItem = m_rootItem->child(i);
+        QModelIndex groupModelIndex = createIndex(i, 0, groupItem);
+        for (int j = 0; j < groupItem->childCount(); j++)
+        {
+            MailTreeItem *conversationItem = groupItem->child(j);  //会话
+            QModelIndex converModelIndex = createIndex(j, 0, conversationItem);
+            for (int m = 0; m < conversationItem->childCount(); m++)
+            {
+                MailTreeItem *mailItem = conversationItem->child(m); //邮件
+                mailModelIndex = createIndex(m, 0, mailItem);
+                if (mailItem->stItemData.id == stItemData.id)
+                {
+                    return mailModelIndex;
+                }
+            }
+        }
+    }
+    return rootModelIndex;
+    /*
+    QModelIndex rootModelIndex = QModelIndex();
+    QModelIndex mailModelIndex;
+    int groupCount = rowCount(rootModelIndex);
+    for (int i = 0; i < groupCount; i++) //遍历分组
+    {
+    QModelIndex groupModelIndex = index(i, 0, rootModelIndex);
+    int converCount = rowCount(groupModelIndex);
+    for (int j = 0; j < converCount; j++)
+    {
+    QModelIndex converModelIndex = index(j, 0, groupModelIndex);
+    int mailCount = rowCount(converModelIndex);
+    for (int m = 0; m < mailCount; m++)
+    {
+    mailModelIndex = index(m, 0, converModelIndex);
+    MailTreeItem *mailItem = getItem(mailModelIndex);
+    if (mailItem->stItemData.id == stItemData.id)
+    {
+    return mailModelIndex;
+    }
+    }
+    }
+    }
+    return rootModelIndex;
+    */
+    
+
+    /*
+    bool find = false;
+    QModelIndex rootModelIndex = QModelIndex();
+    QModelIndex mailModelIndex;
+    for (int i = 0; i < m_rootItem->childCount(); i++) //遍历分组
+    {
+        MailTreeItem *groupItem = m_rootItem->child(i);
+        QModelIndex groupModelIndex = index(i, 0, rootModelIndex);
+        for (int j = 0; j < groupItem->childCount(); j++)
+        {
+            MailTreeItem *conversationItem = groupItem->child(j);  //会话
+            QModelIndex converModelIndex = index(j, 0, groupModelIndex);
+            for (int m = 0; m < conversationItem->childCount(); m++)
+            {
+                MailTreeItem *mailItem = conversationItem->child(m); //邮件
+                mailModelIndex = index(m, 0, converModelIndex);
+                if (mailItem->stItemData.id == stItemData.id)
+                {
+                    find = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (find)
+    {
+        return mailModelIndex;
+    }
+    return rootModelIndex;
+    */
 }
 
 bool QMailTreeModel::deleteRecord(const MailListItemData & stItemData)
@@ -189,12 +273,12 @@ QString QMailTreeModel::querySizeGroupName(uint32_t messageSize)
     return sizeGroupName;
 }
 
-QString QMailTreeModel::generationGroupName(const MailHeaderInfo & stMailHeaderInfo)
+QString QMailTreeModel::generationGroupName(const MailHeaderTable & stMailHeaderInfo)
 {
     QString groupName;
     switch (m_queryConditions.curSortColumn)
     {
-    case MLMC_Date:
+    case MLMCE_Date:
     {
         groupName = QObject::tr("early");
         //今天
@@ -221,7 +305,7 @@ QString QMailTreeModel::generationGroupName(const MailHeaderInfo & stMailHeaderI
         }
         break;
     }
-    case MLMC_Size:
+    case MLMCE_Size:
     {
         uint32_t messageSize = stMailHeaderInfo.messageSize;//CMemoryDBManager::instance()->getSize(stMailListItemData);
         groupName = querySizeGroupName(messageSize);
@@ -271,7 +355,7 @@ void QMailTreeModel::generateQueryResultSet()
     {
         m_setQueryResult.swap(m_setQueryResult_Memory);
     }
-    if (MLDM_CONVERSATION == m_queryConditions.mailListDisplayMode)
+    if (MLDM_CONVERSATION == m_queryConditions.displayMode)
     {
         QSet<QuerySummaryInfo>::const_iterator iter = m_setQueryResult.constBegin();
         while (iter != m_setQueryResult.constEnd())
@@ -280,7 +364,7 @@ void QMailTreeModel::generateQueryResultSet()
             ++iter;
         }
     }
-    else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
+    else if (MLDM_MAIL == m_queryConditions.displayMode)
     {
 
     }
@@ -298,17 +382,17 @@ void QMailTreeModel::regenerateMailListModelData()
     QString consumingTime = " regenerateMailListModelData  1. consume:" + QString::number(timeConsuming.elapsed());
     qDebug() << consumingTime;
     MailListItemData stMailListItemData;
-    if (MLDM_CONVERSATION == m_queryConditions.mailListDisplayMode)
+    if (MLDM_CONVERSATION == m_queryConditions.displayMode)
     {
         //1. 生成一级分组信息
         CMemoryDBManager::instance()->clearGroup();
-        MailHeaderInfo stMailHeaderInfo;
+        MailHeaderTable stMailHeaderInfo;
         MailConversationTable stMailConversationInfo;
         QSet<uint32_t>::const_iterator iter = m_setQueryResult_Conversation.constBegin();
         while (iter != m_setQueryResult_Conversation.constEnd())
         {
             stMailConversationInfo = CMemoryDBManager::instance()->getConversationHeader(*iter);
-            MailGroupInfo stMailGroupInfo;
+            MailGroupVTable stMailGroupInfo;
             stMailGroupInfo.name = generationGroupName(stMailConversationInfo);
             stMailGroupInfo = CMemoryDBManager::instance()->addGroup(stMailGroupInfo);
             stMailListItemData.itemType = MLIT_GROUP;
@@ -334,7 +418,7 @@ void QMailTreeModel::regenerateMailListModelData()
             stMailListItemData.id = stMailConversationInfo.id;
             //stMailListItemData.messageSize = stMailConversationInfo.messageSize;
             QString groupName = generationGroupName(stMailConversationInfo);
-            MailGroupInfo stMailGroupInfo = CMemoryDBManager::instance()->getGroupHeader(groupName);
+            MailGroupVTable stMailGroupInfo = CMemoryDBManager::instance()->getGroupHeader(groupName);
             stParentMailListItemData.id = stMailGroupInfo.id;
             stParentMailListItemData.itemType = MLIT_GROUP;
             MailTreeItem *parent = getParentItem(stParentMailListItemData);
@@ -366,9 +450,9 @@ void QMailTreeModel::regenerateMailListModelData()
         consumingTime = " regenerateMailListModelData  3 consume:" + QString::number(timeConsuming.elapsed());
         qDebug() << consumingTime;
     }
-    else if (MLDM_MAIL == m_queryConditions.mailListDisplayMode)
+    else if (MLDM_MAIL == m_queryConditions.displayMode)
     {
-        MailHeaderInfo stMailHeaderInfo;
+        MailHeaderTable stMailHeaderInfo;
         QSet<QuerySummaryInfo>::const_iterator iter = m_setQueryResult.constBegin();
         while (iter != m_setQueryResult.constEnd())
         {
@@ -432,7 +516,7 @@ void QMailTreeModel::queryInMemoryResultSet()
     m_setQueryResult_Memory.clear();
     m_setQueryResult_DB.clear();
     m_setQueryResult_Conversation.clear();
-    QMapIterator<uint64_t, MailHeaderInfo> iter(CMemoryDBManager::instance()->m_mapMailMemoryData);
+    QMapIterator<uint64_t, MailHeaderTable> iter(CMemoryDBManager::instance()->m_mapMailMemoryData);
     while (iter.hasNext()) {
         iter.next();
         if (whetherNeedToDisplay(iter.value()))
@@ -445,7 +529,7 @@ void QMailTreeModel::queryInMemoryResultSet()
 }
 
 
-bool QMailTreeModel::whetherNeedToDisplay(const MailHeaderInfo & stMailHeaderInfo)
+bool QMailTreeModel::whetherNeedToDisplay(const MailHeaderTable & stMailHeaderInfo)
 {
     uint32_t queryFlags = QMF_NONE;
     uint32_t passQueryFlags = QMF_NONE;
@@ -526,7 +610,7 @@ bool QMailTreeModel::whetherNeedToDisplay(const MailHeaderInfo & stMailHeaderInf
 }
 
 
-void QMailTreeModel::addToQuerySet(const MailHeaderInfo & stMailHeaderInfo)
+void QMailTreeModel::addToQuerySet(const MailHeaderTable & stMailHeaderInfo)
 {
     QuerySummaryInfo stQuerySummaryInfo;
     stQuerySummaryInfo.id = stMailHeaderInfo.id;
@@ -550,7 +634,7 @@ MailTreeItem * QMailTreeModel::getParentItem(const MailListItemData & stMailList
 //! [2]
 int QMailTreeModel::columnCount(const QModelIndex & /* parent */) const
 {
-    return MLMC_Count;
+    return MLMCE_Count;
     //return m_rootItem->columnCount();
 }
 //! [2]
@@ -599,43 +683,43 @@ QVariant QMailTreeModel::headerData(int section, Qt::Orientation orientation,
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section) {
-            case MLMC_Fold:
+            case MLMCE_Fold:
                 rv = tr("        ");
                 break;
-            case MLMC_Id:
+            case MLMCE_Id:
                 rv = tr("ID");
                 break;
 
-            case MLMC_ItemType:
+            case MLMCE_ItemType:
                 rv = tr("ItemType");
                 break;
 
-            case MLMC_Priority:
+            case MLMCE_Priority:
                 rv = tr("Priority");
                 break;
 
-            case MLMC_Attachment:
+            case MLMCE_Attachment:
                 rv = tr("Attachment");
                 break;
-            case MLMC_From:
+            case MLMCE_From:
                 rv = tr("From");
                 break;
-            case MLMC_To:
+            case MLMCE_To:
                 rv = tr("To");
                 break;
-            case MLMC_Subject:
+            case MLMCE_Subject:
                 rv = tr("            Subject            ");
                 break;
-            case MLMC_Date:
+            case MLMCE_Date:
                 rv = tr("Date");
                 break;
-            case MLMC_Size:
+            case MLMCE_Size:
                 rv = tr("    Size    ");
                 break;
-            case MLMC_Folder:
+            case MLMCE_Folder:
                 rv = tr("Folder");
                 break;
-            case MLMC_Uid:
+            case MLMCE_Uid:
                 rv = tr("UID");
                 break;
 

@@ -398,6 +398,14 @@ void QtBase::on_stringProcePushButton_clicked()
     //mailIds.removeOne("0");
     QString strMailIds = mailIds.join(",");
     qDebug() << strMailIds;
+
+    QSet<uint64_t> setMailIds2;
+    QStringList mailIds2 = strMailIds.split(",");
+    foreach(const QString &id, mailIds2) {
+        setMailIds2.insert(id.toULongLong());
+    }
+    int xxx;
+    xxx++;
 }
 #pragma endregion 字符串处理
 
@@ -442,16 +450,16 @@ void QtBase::on_queryPushButton_clicked()
     int displayMode = MLDM_CONVERSATION;//MLDM_CONVERSATION; MLDM_MAIL
     if (displayMode == MLDM_MAIL)
     {
-        ui.mailListTreeView->setColumnHidden(MLMC_Fold, true);
+        ui.mailListTreeView->setColumnHidden(MLMCE_Fold, true);
     }
     else
     {
-        ui.mailListTreeView->setColumnHidden(MLMC_Fold, false);
+        ui.mailListTreeView->setColumnHidden(MLMCE_Fold, false);
     }
-    int sortColumn = MLMC_Date;
+    int sortColumn = MLMCE_Date;
     ui.mailListTreeView->setDisplayMode(displayMode);
     QueryConditions stQueryConditions;
-    stQueryConditions.mailListDisplayMode = displayMode;
+    stQueryConditions.displayMode = displayMode;
     stQueryConditions.curSortColumn = sortColumn;
     stQueryConditions.folderId = ui.folderIdQueryLineEdit->text().toUInt();
     stQueryConditions.query = true;
@@ -481,7 +489,7 @@ void QtBase::on_AddPushButton_clicked()
     */
 
     uint64_t   mailId = ui.deleteMailLineEdit->text().toULongLong();
-    MailHeaderInfo stMailHeaderInfo;
+    MailHeaderTable stMailHeaderInfo;
     QDate now = QDate::currentDate();
     QDateTime mailDate(QDate(now.year(), now.month(), now.day()), QTime(10, 10, 10));
     stMailHeaderInfo.date = mailDate.toTime_t();
@@ -504,7 +512,7 @@ void QtBase::onMailListSelectChanged(const MailListSelectData & stMailListSelect
         stMailListSelectItemData = stMailListSelectData.vecselectItemDatas.at(i);
         if (stMailListSelectItemData.itemType == MLIT_MAIL)
         {
-            MailHeaderInfo stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader(stMailListSelectItemData.id);
+            MailHeaderTable stMailHeaderInfo = CMemoryDBManager::instance()->getMailHeader(stMailListSelectItemData.id);
             ui.statusLabel->setText(stMailHeaderInfo.Subject);
         }
         else if (stMailListSelectItemData.itemType == MLIT_CONVERSATION)
@@ -522,6 +530,16 @@ void QtBase::onMailListSelectChanged(const MailListSelectData & stMailListSelect
 void QtBase::onRefreshAccountMails()
 {
     ui.mailListTreeView->expandAll();
+}
+
+void QtBase::on_saveStatusInfoPushButton_clicked()
+{
+    ui.mailListTreeView->saveStatusInfo();
+}
+
+void QtBase::on_recoveryStatusInfoPushButton_clicked()
+{
+    ui.mailListTreeView->recoveryStatusInfo();
 }
 
 #pragma endregion 邮件列表

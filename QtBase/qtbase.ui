@@ -26,7 +26,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -339,6 +339,32 @@
           </property>
           <property name="text">
            <string>添加</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="saveStatusInfoPushButton">
+          <property name="geometry">
+           <rect>
+            <x>230</x>
+            <y>30</y>
+            <width>91</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>保存状态信息</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="recoveryStatusInfoPushButton">
+          <property name="geometry">
+           <rect>
+            <x>360</x>
+            <y>30</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>恢复状态信息</string>
           </property>
          </widget>
         </widget>

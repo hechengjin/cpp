@@ -27,11 +27,11 @@ void QMailItemDelegate::paint(QPainter *painter,
         painter->fillRect(option.rect, QBrush(QColor("#fcfcfc")));
         paintGrid(painter, option.rect);
 
-        if (index.column() == MLMC_Fold) {
+        if (index.column() == MLMCE_Fold) {
             QStyledItemDelegate::paint(painter, viewOption, index);
             return;
         }
-        else if (index.column() == MLMC_Subject)
+        else if (index.column() == MLMCE_Subject)
         {
             viewOption.font.setBold(false);
             viewOption.rect.setLeft(20);
@@ -50,7 +50,7 @@ void QMailItemDelegate::paint(QPainter *painter,
             viewOption.state = viewOption.state ^ QStyle::State_HasFocus;
 
         // 进行大小转换
-        if (index.column() == MLMC_Size)
+        if (index.column() == MLMCE_Size)
         {
             qint64 bytes = index.data().toLongLong();
             viewOption.text = bytesToGBMBKB(bytes);

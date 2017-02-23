@@ -38,6 +38,9 @@ private slots:
     void on_updateMailPushButton_clicked();
     void on_queryPushButton_clicked();
     void on_AddPushButton_clicked();
+    void on_saveStatusInfoPushButton_clicked();
+    void on_recoveryStatusInfoPushButton_clicked();
+
     void onMailListSelectChanged(const MailListSelectData & stMailListSelectData);
 
     void onRefreshAccountMails();

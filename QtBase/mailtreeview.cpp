@@ -31,7 +31,7 @@ void QMailTreeView::init()
     QMailSortFilterProxyModel::instance()->setSourceModel(QMailTreeModel::instance());
     setModel(QMailSortFilterProxyModel::instance());
     setSortingEnabled(true);
-    sortByColumn(MLMC_Date, Qt::DescendingOrder);
+    sortByColumn(MLMCE_Date, Qt::DescendingOrder);
     m_pMailTreeViewHeader = new QMailTreeViewHeader(this);
     setHeader(m_pMailTreeViewHeader);
     connect(m_pMailTreeViewHeader, SIGNAL(refreshAccountsMailList()), this, SLOT(onRefreshAccountMails()));
@@ -39,7 +39,7 @@ void QMailTreeView::init()
     setItemDelegate(new QMailItemDelegate(this));
     for (int column = 0; column < QMailTreeModel::instance()->columnCount(); ++column)
         resizeColumnToContents(column);
-    setColumnHidden(MLMC_Priority, true);
+    setColumnHidden(MLMCE_Priority, true);
 
     //ÓÒ¼ü²Ëµ¥ÉèÖÃ
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -77,7 +77,7 @@ void QMailTreeView::slotEntered(const QModelIndex &index)
         return;
 
     int nColumn = index.column();
-    if ((nColumn == MLMC_Size))
+    if ((nColumn == MLMCE_Size))
         QToolTip::showText(QCursor::pos(), index.data().toString());
 }
 
@@ -157,4 +157,56 @@ void QMailTreeView::setDisplayMode(int displayMode)
     {
         m_pMailTreeViewHeader->setDisplayMode(displayMode);
     }
+}
+
+void QMailTreeView::saveStatusInfo()
+{
+    m_itemSelection = selectionModel()->selection();
+    QString text;
+    foreach(QModelIndex index, m_itemSelection.indexes())
+    {
+        text = QString("(%1,%2)").arg(index.row()).arg(index.column());
+        //MailListItemData stMailListItemData;
+        //stMailListItemData.id = 2;
+        //QMailTreeModel::instance()->setData(index, stMailListItemData);//QMailSortFilterProxyModel::instance()
+        //qDebug() << text;
+    }
+    qDebug() << text;
+    QModelIndexList selectedList = this->selectionModel()->selectedRows();
+    QListIterator<QModelIndex> i(selectedList);
+    while (i.hasNext())
+    {
+        QModelIndex modelIndex = i.next();
+        MailTreeItem *item = QMailTreeModel::instance()->getItem(QMailSortFilterProxyModel::instance()->mapToSource(modelIndex));
+        m_selMailListItemData.itemType = item->stItemData.itemType;
+        m_selMailListItemData.id = item->stItemData.id;
+    }
+    qDebug() << m_selMailListItemData.itemType << " " << m_selMailListItemData.id;
+    
+}
+
+void QMailTreeView::recoveryStatusInfo()
+{
+    foreach(QModelIndex index, m_itemSelection.indexes())
+    {
+        QString text = QString("(%1,%2)")
+            .arg(index.row() + 1).arg(index.column() + 1);
+        //QMailSortFilterProxyModel::instance()->setData(index, text);
+        //qDebug() << text;
+    }
+    //int topLeftRow = indexList[0].row();
+    //int bottomRightRow = indexList[indexList.count() - 1].row();
+    //QModelIndex topLeft = QMailSortFilterProxyModel::instance()->index(topLeftRow, 0, QModelIndex());
+    //QModelIndex bottomRight = QMailSortFilterProxyModel::instance()->index(bottomRightRow, 0, QModelIndex());
+    qDebug() << "recovery:" << m_selMailListItemData.itemType << " " << m_selMailListItemData.id;
+    QModelIndex rowPosIndex = QMailTreeModel::instance()->itemToIndex(m_selMailListItemData);
+    QString sorceInfo = QString("(%1,%2)").arg(rowPosIndex.row()).arg(rowPosIndex.column());
+    qDebug() << "source:" << sorceInfo;
+    QModelIndex proxyIndex = QMailSortFilterProxyModel::instance()->mapFromSource(rowPosIndex);
+    QString proxyInfo = QString("(%1,%2)").arg(proxyIndex.row()).arg(proxyIndex.column());
+    qDebug() << "proxy:" << proxyInfo;
+    m_itemSelection.select(proxyIndex, proxyIndex);
+    //selectionModel()->select(m_itemSelection, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+
+    setCurrentIndex(proxyIndex);
 }

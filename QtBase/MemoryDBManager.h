@@ -13,10 +13,10 @@ public:
 
 public:
 #pragma region 邮件列表
-    MailHeaderInfo getMailHeader(uint64_t mailId);
+    MailHeaderTable getMailHeader(uint64_t mailId);
     MailConversationTable getConversationHeader(uint32_t converId);
     bool deleteMailRecord(uint64_t mailId, uint32_t folderId = 1);
-    bool addMailRecord(MailHeaderInfo&  stMailInfo);
+    bool addMailRecord(MailHeaderTable&  stMailInfo);
     bool addConversation(const MailConversationTable & stMailConversationInfo);
     bool addConversationMail(uint32_t converId, uint64_t mailId);
     uint32_t getFolderId(const MailListItemData & stItemData);
@@ -24,10 +24,10 @@ public:
     uint64_t getTime(const MailListItemData & stItemData);
     QString getSubject(const MailListItemData & stItemData);
 
-    MailGroupInfo addGroup(MailGroupInfo & stMailGroupInfo);
-    uint32_t existGroup(const MailGroupInfo & stMailGroupInfo);
-    MailGroupInfo getGroupHeader(uint32_t groupId);
-    MailGroupInfo getGroupHeader(QString groupName);
+    MailGroupVTable addGroup(MailGroupVTable & stMailGroupInfo);
+    uint32_t existGroup(const MailGroupVTable & stMailGroupInfo);
+    MailGroupVTable getGroupHeader(uint32_t groupId);
+    MailGroupVTable getGroupHeader(QString groupName);
     void clearGroup();
 #pragma endregion 邮件列表
 
@@ -35,13 +35,13 @@ public:
     void init();
 
 private:
-    QMap<uint64_t, MailHeaderInfo> m_mapMailMemoryData;
+    QMap<uint64_t, MailHeaderTable> m_mapMailMemoryData;
     QMutex  m_mailMutex;
 
     QMap<uint32_t, MailConversationTable> m_mapMailConversationData;
     QMutex  m_converMutex;
 
-    QMap<uint32_t, MailGroupInfo> m_mapMailGroupData;
+    QMap<uint32_t, MailGroupVTable> m_mapMailGroupData;
     uint32_t m_groupId;
     QMutex  m_groupMutex;
     

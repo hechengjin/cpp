@@ -35,7 +35,7 @@ void CMemoryDBManager::init()
     beforeyesterday = beforeyesterday.addDays(-1);
     for (int i = 0; i < 10; i++) //初始化邮件数据
     {
-        MailHeaderInfo stMailHeaderInfo;
+        MailHeaderTable stMailHeaderInfo;
         stMailHeaderInfo.id = i + 1;
         stMailHeaderInfo.serverId = oneServerId;
         if (i%2 == 0)
@@ -47,7 +47,7 @@ void CMemoryDBManager::init()
 
         int size = qrand() % 5242880000 + 1; 
         stMailHeaderInfo.messageSize = size;
-        if ( i>=1 && i<=5)
+        if ( i>=2 && i<=5)
         {
             stMailHeaderInfo.conversationId = 1;
         }
@@ -131,7 +131,7 @@ void CMemoryDBManager::init()
     //}
     addConversation(stMailConversationInfo);
 
-    QMapIterator<uint64_t, MailHeaderInfo> iter(m_mapMailMemoryData);
+    QMapIterator<uint64_t, MailHeaderTable> iter(m_mapMailMemoryData);
     while (iter.hasNext())
     {
         iter.next();
@@ -151,12 +151,12 @@ void CMemoryDBManager::init()
     qDebug() << consumingTime;
 }
 
-MailHeaderInfo CMemoryDBManager::getMailHeader(uint64_t mailId)
+MailHeaderTable CMemoryDBManager::getMailHeader(uint64_t mailId)
 {
     QMutexLocker locker(&m_mailMutex);
     if(m_mapMailMemoryData.contains(mailId))
         return m_mapMailMemoryData[mailId];
-    MailHeaderInfo stMailHeaderInfo;
+    MailHeaderTable stMailHeaderInfo;
     return stMailHeaderInfo;
 }
 
@@ -238,7 +238,7 @@ bool CMemoryDBManager::deleteMailRecord(uint64_t mailId, uint32_t folderId)
     return true;
 }
 
-bool CMemoryDBManager::addMailRecord(MailHeaderInfo&  stMailInfo)
+bool CMemoryDBManager::addMailRecord(MailHeaderTable&  stMailInfo)
 {
     QMutexLocker locker(&m_mailMutex);
     m_mapMailMemoryData.insert(stMailInfo.id, stMailInfo);
@@ -262,20 +262,20 @@ bool CMemoryDBManager::addConversationMail(uint32_t converId, uint64_t mailId)
 }
 
 
-MailGroupInfo CMemoryDBManager::getGroupHeader(uint32_t groupId)
+MailGroupVTable CMemoryDBManager::getGroupHeader(uint32_t groupId)
 {
     QMutexLocker locker(&m_groupMutex);
     if (m_mapMailGroupData.contains(groupId))
     {
         return m_mapMailGroupData[groupId];
     }
-    MailGroupInfo stMailGroupInfo;
+    MailGroupVTable stMailGroupInfo;
     return stMailGroupInfo;
 }
 
-MailGroupInfo CMemoryDBManager::getGroupHeader(QString groupName)
+MailGroupVTable CMemoryDBManager::getGroupHeader(QString groupName)
 {
-    MailGroupInfo stMailGroupInfo;
+    MailGroupVTable stMailGroupInfo;
     {
         QMutexLocker locker(&m_groupMutex);
         stMailGroupInfo.name = groupName;
@@ -288,7 +288,7 @@ MailGroupInfo CMemoryDBManager::getGroupHeader(QString groupName)
     return addGroup(stMailGroupInfo);
 }
 
-MailGroupInfo CMemoryDBManager::addGroup(MailGroupInfo & stMailGroupInfo)
+MailGroupVTable CMemoryDBManager::addGroup(MailGroupVTable & stMailGroupInfo)
 {
     QMutexLocker locker(&m_groupMutex);
     uint32_t groupId = existGroup(stMailGroupInfo);
@@ -301,9 +301,9 @@ MailGroupInfo CMemoryDBManager::addGroup(MailGroupInfo & stMailGroupInfo)
     return m_mapMailGroupData[stMailGroupInfo.id];
 }
 
-uint32_t CMemoryDBManager::existGroup(const MailGroupInfo & stMailGroupInfo)
+uint32_t CMemoryDBManager::existGroup(const MailGroupVTable & stMailGroupInfo)
 {
-    QMapIterator<uint32_t, MailGroupInfo> iter(m_mapMailGroupData);
+    QMapIterator<uint32_t, MailGroupVTable> iter(m_mapMailGroupData);
     while (iter.hasNext()) {
         iter.next();
         if (iter.value().name == stMailGroupInfo.name)

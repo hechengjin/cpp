@@ -36,7 +36,7 @@ public:
     void clear();
     bool deleteRecord(const MailListItemData & stItemData);
     bool updateRecord(const MailListItemData & stItemData);
-
+    QModelIndex itemToIndex(const MailListItemData & stItemData);
 private:
     void initRootItem();
     void resetModel();
@@ -44,14 +44,14 @@ private:
 
     bool stepQueryData();
     void queryInMemoryResultSet(); //内存查询
-    bool whetherNeedToDisplay(const MailHeaderInfo & stMailHeaderInfo); //判断是否需要显示，即是否是要查询的记录
-    void addToQuerySet(const MailHeaderInfo & stMailHeaderInfo); //添加到查询结果集
+    bool whetherNeedToDisplay(const MailHeaderTable & stMailHeaderInfo); //判断是否需要显示，即是否是要查询的记录
+    void addToQuerySet(const MailHeaderTable & stMailHeaderInfo); //添加到查询结果集
     void generateQueryResultSet(); //生成查询结果集
     void regenerateMailListModelData(); // 生成Model数据
     void updateProxyModelData();//更新排序用视图数据
     //会话中的邮件是否符合查询条件
     bool converMailLegal(uint64_t mailId);
-    QString generationGroupName(const MailHeaderInfo & stMailHeaderInfo);
+    QString generationGroupName(const MailHeaderTable & stMailHeaderInfo);
     QString querySizeGroupName(uint32_t messageSize);
 public:
 

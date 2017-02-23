@@ -15,6 +15,8 @@ public:
 
 public:
     void setDisplayMode(int displayMode);
+    void saveStatusInfo();
+    void recoveryStatusInfo();
 protected:
     void init();
     void signalSlotConnection();
@@ -29,6 +31,8 @@ protected slots:
     void onRefreshAccountMails();
 private:
     QMailTreeViewHeader * m_pMailTreeViewHeader;
+    QItemSelection      m_itemSelection;
+    MailListItemData m_selMailListItemData;
 };
 
 #endif // QMAILTREEVIEW_H
